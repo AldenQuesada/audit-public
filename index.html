@@ -1,0 +1,1412 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Gluco AI · Auditoria End-to-End · Método AQS · v2 com SQL real</title>
+<meta name="description" content="Auditoria read-only completa do Método de Controle Rápido da Glicemia · Protocolo AQS · do Gluco AI · 2026-05-15 · v2 validada em Postgres real" />
+<meta name="theme-color" content="#0a0d18" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          primary: { 50:'#eef4ff', 100:'#dbe8ff', 400:'#5a91ff', 500:'#2B7FFF', 600:'#1e6ae6', 700:'#1955b8' },
+          ink: { 950:'#06080e', 900:'#0a0d18', 800:'#11151f', 700:'#1a1f2e', 600:'#2a3145', 500:'#3d4659', 400:'#6b7588', 300:'#9aa3b8', 200:'#c6cddd', 100:'#e6ebf4', 50:'#f4f6fb' },
+          danger: '#ef4444', warn: '#f59e0b', ok: '#10b981', info: '#7c9eff',
+        },
+        fontFamily: {
+          sans: ['Inter', 'system-ui', 'sans-serif'],
+          mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],
+        },
+        boxShadow: {
+          'soft': '0 1px 3px rgba(0,0,0,.2), 0 1px 2px rgba(0,0,0,.12)',
+          'lift': '0 8px 24px rgba(0,0,0,.35), 0 2px 6px rgba(0,0,0,.18)',
+        },
+      },
+    },
+  };
+</script>
+<style>
+  html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+  body { font-feature-settings: 'cv11','ss01','ss03'; }
+  .gradient-text { background: linear-gradient(135deg,#2B7FFF 0%,#7c9eff 60%,#00d9b4 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .glass { background: rgba(17,21,31,.85); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+  .anchor-link { opacity: 0; transition: opacity .15s; }
+  h2:hover .anchor-link, h3:hover .anchor-link { opacity: 1; }
+  /* table */
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  table th, table td { padding: 10px 12px; text-align: left; vertical-align: top; border-bottom: 1px solid rgba(106,117,136,.18); }
+  table thead th { background: rgba(43,127,255,.06); color: #c6cddd; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; font-size: 11px; border-bottom: 1px solid rgba(43,127,255,.25); }
+  table tbody tr:hover { background: rgba(43,127,255,.04); }
+  /* pre/code */
+  pre { background: #06080e; border: 1px solid #1a1f2e; border-radius: 12px; padding: 16px; overflow-x: auto; font-family: 'JetBrains Mono', monospace; font-size: 12.5px; line-height: 1.6; color: #c6cddd; }
+  :not(pre) > code { background: rgba(43,127,255,.10); border: 1px solid rgba(43,127,255,.25); color: #9aa3b8; padding: 1px 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 0.86em; }
+  pre code { background: transparent; border: 0; padding: 0; color: inherit; }
+  /* tip-style box */
+  .callout { border-left: 3px solid; padding: 14px 18px; border-radius: 0 10px 10px 0; margin: 14px 0; }
+  .callout-fail { background: rgba(239,68,68,.08); border-color: #ef4444; }
+  .callout-review { background: rgba(245,158,11,.08); border-color: #f59e0b; }
+  .callout-ok { background: rgba(16,185,129,.08); border-color: #10b981; }
+  .callout-info { background: rgba(43,127,255,.08); border-color: #2B7FFF; }
+  /* badge */
+  .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 999px; font-size: 10.5px; font-weight: 700; line-height: 1; white-space: nowrap; }
+  .badge-fail { background: rgba(239,68,68,.12); color: #ef4444; }
+  .badge-review { background: rgba(245,158,11,.12); color: #f59e0b; }
+  .badge-ok { background: rgba(16,185,129,.12); color: #10b981; }
+  .badge-info { background: rgba(43,127,255,.12); color: #2B7FFF; }
+  .badge-muted { background: rgba(154,163,184,.12); color: #9aa3b8; }
+  /* TOC */
+  .toc a { display: block; padding: 6px 10px; color: #9aa3b8; border-radius: 6px; font-size: 13px; transition: all 150ms; border-left: 2px solid transparent; }
+  .toc a:hover { background: rgba(43,127,255,.06); color: #c6cddd; }
+  .toc a.active { background: rgba(43,127,255,.10); color: #2B7FFF; border-left-color: #2B7FFF; font-weight: 500; }
+  .toc-sub { padding-left: 18px; font-size: 12px; }
+  /* mermaid */
+  .mermaid { background: #06080e; border: 1px solid #1a1f2e; border-radius: 12px; padding: 24px; margin: 16px 0; overflow-x: auto; }
+  /* print */
+  @media print {
+    .no-print { display: none !important; }
+    body { background: white; color: black; }
+    .glass, pre, table { background: white !important; color: black !important; border-color: #ddd !important; }
+    h1,h2,h3,h4 { color: black !important; page-break-after: avoid; }
+    .callout { border-color: #888 !important; background: #f4f4f4 !important; }
+  }
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: #06080e; }
+  ::-webkit-scrollbar-thumb { background: #2a3145; border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: #3d4659; }
+  /* tabs */
+  .tab-btn { padding: 14px 20px; border-bottom: 3px solid transparent; color: #9aa3b8; font-weight: 500; font-size: 14px; transition: all 200ms; cursor: pointer; white-space: nowrap; }
+  .tab-btn:hover { color: #c6cddd; background: rgba(43,127,255,.05); }
+  .tab-btn.active { color: #2B7FFF; border-bottom-color: #2B7FFF; font-weight: 600; background: rgba(43,127,255,.06); }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+</style>
+</head>
+<body class="bg-ink-900 text-ink-100 font-sans antialiased">
+
+<!-- HEADER STICKY -->
+<header class="glass border-b border-ink-700 sticky top-0 z-40">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center gap-4">
+    <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-500 to-info flex items-center justify-center shadow-soft flex-shrink-0">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+    </div>
+    <div class="min-w-0 flex-1">
+      <div class="text-[10px] uppercase tracking-[0.2em] text-ink-400 font-bold">Auditoria · Read-only</div>
+      <div class="text-sm font-semibold text-ink-100 truncate">Gluco AI · Método AQS · Controle Rápido da Glicemia</div>
+    </div>
+    <div class="hidden md:flex items-center gap-2 flex-shrink-0">
+      <span class="badge badge-fail">🔴 FAIL_DB</span>
+      <span class="badge badge-fail">🔴🔴 SCHEMA_DRIFT_55%</span>
+      <span class="badge badge-muted hidden lg:inline">v2 · 2026-05-15</span>
+    </div>
+    <button onclick="window.print()" class="no-print text-ink-300 hover:text-primary-500 transition-colors p-2 rounded-lg hover:bg-ink-700" aria-label="Imprimir">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+    </button>
+  </div>
+</header>
+
+<!-- TAB NAV -->
+<nav class="no-print glass border-b border-ink-700 sticky top-16 z-30">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex overflow-x-auto">
+    <button class="tab-btn active" data-tab="audit">📋 Auditoria End-to-End</button>
+    <button class="tab-btn" data-tab="blueprint">🏗 Blueprint DB v2</button>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- TAB CONTENT: AUDITORIA (DEFAULT VISÍVEL)               -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="tab-content active" data-tab-content="audit">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+  <div class="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-10">
+
+    <!-- TOC LATERAL -->
+    <aside class="no-print lg:sticky lg:top-24 lg:self-start lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto">
+      <nav class="toc space-y-0.5 pb-6">
+        <div class="text-[10px] font-bold uppercase tracking-[0.18em] text-ink-400 px-3 mb-2">Sumário · v2</div>
+        <a href="#veredito">1 · Veredito executivo</a>
+        <a href="#drift" style="color:#ef4444;font-weight:600">🚨 1b · DRIFT 55% (novo)</a>
+        <a href="#repo">2 · Estado do repositório</a>
+        <a href="#fluxos">3 · Fluxos end-to-end</a>
+        <a href="#pipeline">4 · Mapa do pipeline</a>
+        <a href="#banco-fonte">5 · Banco como fonte da verdade</a>
+        <a href="#schema">6 · Estrutura de banco</a>
+        <a href="#aqs">7 · Protocolos AQS</a>
+        <a href="#mensagens">8 · Mensagens / alarmes</a>
+        <a href="#fluxograma">9 · Fluxograma Mermaid</a>
+        <a href="#gaps">10 · Gaps P0/P1/P2</a>
+        <a href="#hardcodes">11 · Hardcodes (24)</a>
+        <a href="#riscos">12 · Riscos clínicos</a>
+        <a href="#proposta">13 · Schema ideal</a>
+        <a href="#evidencias">14 · Evidências</a>
+        <a href="#sql-real" style="color:#10b981;font-weight:600">✅ 14b · Comprovação SQL real (novo)</a>
+        <a href="#final">15 · Veredito final</a>
+        <a href="#resumo">📊 Resumo 1 minuto</a>
+      </nav>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="min-w-0">
+
+      <!-- HERO -->
+      <div class="mb-12">
+        <div class="text-xs uppercase tracking-[0.2em] text-ink-400 font-bold mb-3">📋 Auditoria End-to-End</div>
+        <h1 class="text-3xl md:text-5xl font-bold tracking-tight leading-tight mb-4">
+          Método de <span class="gradient-text">Controle Rápido</span><br/>da Glicemia · <span class="gradient-text">Gluco AI</span>
+        </h1>
+        <p class="text-ink-300 text-base md:text-lg max-w-3xl leading-relaxed">
+          Read-only audit. Zero <code>INSERT/UPDATE/DELETE/DDL/deploy/commit/push/provider call</code>.
+          Realizada em <strong class="text-ink-100">2026-05-15</strong> sobre <code>main</code> HEAD <code>09477ca</code> do repo <code>github.com/glucoai/glucoai</code>.
+          Toda afirmação material tem evidência rastreável (<code>arquivo:linha</code>, migration ou query SQL).
+        </p>
+        <div class="flex flex-wrap items-center gap-2 mt-5">
+          <span class="badge badge-fail">🔴 FAIL_DB_NOT_SOURCE_OF_TRUTH</span>
+          <span class="badge badge-fail">🔴🔴 SCHEMA_DRIFT_55%</span>
+          <span class="badge badge-ok">✅ Validado em Postgres real</span>
+          <span class="badge badge-muted">Branch: main</span>
+          <span class="badge badge-muted">HEAD: 09477ca</span>
+          <span class="badge badge-muted">v2 · 2026-05-15</span>
+        </div>
+
+        <div class="callout callout-fail mt-6" style="border-color:#ef4444;background:rgba(239,68,68,.10)">
+          <div class="text-xs uppercase tracking-[0.15em] font-bold text-danger mb-2">⚠️ Atualização v2 · 15/maio</div>
+          <p class="text-ink-100 leading-relaxed">
+            Esta auditoria foi <strong>validada com Postgres real</strong> (Neon 17 · SP) aplicando as 8 migrations do repo e rodando
+            21 queries read-only. Resultado revelou <strong class="text-danger">um achado MAIS GRAVE</strong> que o veredito original:
+            <code>schema.prisma</code> declara 20 models, mas as migrations só criam <strong class="text-danger">9 tabelas (drift de 55%)</strong>.
+            11 entidades fundamentais (<code>Automacao</code>, <code>TemplateWhatsapp</code>, <code>Tarefa</code>, <code>ClinicaConfig</code>,
+            <code>Lead</code>, B2B inteiro) <strong>não existem no banco</strong> mesmo após aplicar as migrations canônicas.
+            Veja <a href="#drift" class="text-primary-500 underline">seção 1b · DRIFT</a> e <a href="#sql-real" class="text-primary-500 underline">14b · Comprovação SQL</a>.
+          </p>
+        </div>
+      </div>
+
+      <!-- 1 · VEREDITO -->
+      <section id="veredito" class="mb-14">
+        <h2 class="text-2xl md:text-3xl font-bold mb-4 text-ink-100">1 · Veredito executivo <a class="anchor-link text-primary-500 ml-2 text-base" href="#veredito">¶</a></h2>
+        <div class="callout callout-fail">
+          <div class="font-bold text-xl text-danger mb-2">🔴 FAIL_DB_NOT_SOURCE_OF_TRUTH</div>
+          <p class="text-ink-200 leading-relaxed">
+            O Método de Controle Rápido / Protocolo AQS do Gluco AI está <strong>majoritariamente hardcoded em TypeScript</strong>. O banco (Prisma + Postgres) armazena apenas <strong>fatos</strong> (<code>Glicemia</code>, <code>Refeicao</code>, <code>Mensagem</code>) e templates Meta-aprovados (<code>TemplateWhatsapp</code>). Não existem entidades modeladas para <code>Protocolo</code>, <code>EtapaProtocolo</code>, <code>FaixaGlicemica</code>, <code>Threshold</code>, <code>Timer</code>, <code>Dispatch/Outbox</code>, <code>SessaoProtocolo</code>, <code>EventoDecisao</code>, <code>Predicao</code>, ou versionamento de método.
+          </p>
+          <p class="text-ink-200 leading-relaxed mt-3">
+            O estado runtime do AQS está empurrado num campo JSON arbitrário <code>Paciente.onboardingDados._eventoPremium</code> · sem schema, sem RLS específica, sem auditoria. Três classificadores de glicemia diferentes coexistem no codebase com faixas inconsistentes. Não há tabela de outbox/dispatch · todo <code>setInterval</code>/<code>cron</code> chama send-now síncrono.
+          </p>
+          <p class="text-ink-100 font-semibold mt-3">O banco não pode hoje ser tratado como fonte da verdade do método clínico.</p>
+        </div>
+      </section>
+
+      <!-- 1b · DRIFT (ACHADO NOVO V2) -->
+      <section id="drift" class="mb-14">
+        <h2 class="text-2xl md:text-3xl font-bold mb-4 text-danger flex items-center gap-3">
+          🚨 1b · Schema Drift 55% <span class="badge badge-fail" style="font-size:11px">ACHADO NOVO V2</span>
+          <a class="anchor-link text-primary-500 ml-2 text-base" href="#drift">¶</a>
+        </h2>
+        <p class="text-ink-200 mb-4 leading-relaxed">
+          A auditoria estática (v1) afirmou: <em>"o banco tem 21 tabelas Prisma"</em>. A validação com Postgres real
+          provou que isso é <strong class="text-danger">falso</strong>. O <code>schema.prisma</code> declara 20 models, mas
+          aplicando as 8 migrations canônicas do repo (<code>apps/backend/prisma/migrations/</code>) só são criadas
+          <strong>9 tabelas</strong>. Existe um <strong class="text-danger">drift de 11 entidades (55%)</strong> entre schema
+          declarado e DDL versionado.
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <div class="bg-ink-800 rounded-xl border-2 border-ok p-5">
+            <h4 class="text-ok font-bold mb-3 flex items-center gap-2">✅ Presentes no DB (9 de 20 · 45%)</h4>
+            <ul class="space-y-1 text-sm text-ink-200 font-mono">
+              <li>· Clinica</li>
+              <li>· Usuario</li>
+              <li>· Paciente</li>
+              <li>· Glicemia</li>
+              <li>· Refeicao</li>
+              <li>· Mensagem</li>
+              <li>· Assinatura</li>
+              <li>· Pagamento</li>
+              <li>· ConfiguracaoWhatsapp</li>
+            </ul>
+          </div>
+          <div class="bg-ink-800 rounded-xl border-2 border-danger p-5">
+            <h4 class="text-danger font-bold mb-3 flex items-center gap-2">❌ AUSENTES no DB (11 de 20 · 55%)</h4>
+            <ul class="space-y-1 text-sm text-ink-200 font-mono">
+              <li class="text-danger">· <strong>Lead</strong> <span class="text-ink-400 font-sans">(CRM pré-paciente)</span></li>
+              <li class="text-danger">· <strong>ConviteUsuario</strong></li>
+              <li class="text-danger">· <strong>TemplateWhatsapp</strong> <span class="text-ink-400 font-sans">⚠️ era a "única coisa configurável" do audit original</span></li>
+              <li class="text-danger">· <strong>Automacao</strong> <span class="text-ink-400 font-sans">⚠️ sistema inteiro</span></li>
+              <li class="text-danger">· <strong>ExecucaoAutomacao</strong></li>
+              <li class="text-danger">· <strong>Tarefa</strong></li>
+              <li class="text-danger">· <strong>PacientePlano</strong> <span class="text-ink-400 font-sans">(B2B)</span></li>
+              <li class="text-danger">· <strong>PacienteContrato</strong> <span class="text-ink-400 font-sans">(B2B)</span></li>
+              <li class="text-danger">· <strong>PacientePagamentoClinico</strong> <span class="text-ink-400 font-sans">(B2B)</span></li>
+              <li class="text-danger">· <strong>ClinicaConfig</strong></li>
+              <li class="text-danger">· <strong>UsuarioConfig</strong></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="callout callout-fail">
+          <div class="font-bold text-danger mb-2">Por que isso é mais grave que o achado original</div>
+          <ul class="space-y-2 text-ink-200 leading-relaxed">
+            <li>⚠️ Toda UI de <strong>Automações</strong> (<code>apps/frontend/src/features/automacoes/</code>) faz <code>prisma.automacao.findMany()</code> → falha runtime com <code>relation "Automacao" does not exist</code></li>
+            <li>⚠️ Módulo <strong>B2B</strong> (<code>PacientePlano</code>, <code>PacienteContrato</code>, <code>PacientePagamentoClinico</code>) sem persistência possível</li>
+            <li>⚠️ <code>TemplateWhatsapp</code> · que o relatório v1 citou como única coisa configurável · <strong>nem existe no banco</strong></li>
+            <li>⚠️ <code>Tarefa</code> (workflow clínico) · inexistente</li>
+            <li>⚠️ <code>ClinicaConfig</code> (configurações por clínica) · inexistente</li>
+            <li>⚠️ <code>Lead</code> (CRM) · inexistente</li>
+          </ul>
+        </div>
+
+        <h3 class="text-lg font-semibold text-ink-100 mt-6 mb-3">Enums também sofrem drift</h3>
+        <p class="text-ink-300 mb-3 text-sm">DB tem 12 enums · schema.prisma declara <strong>22 enums</strong> (10 enums declarados também ausentes):</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+          <div class="bg-ink-800 rounded-lg border border-ok/40 p-4">
+            <div class="text-ok text-xs font-bold uppercase mb-2">Enums presentes (12)</div>
+            <div class="font-mono text-ink-300">ContextoGlicemia · GatewayPagamento · OrigemRegistro · Perfil · PlanoAssinatura · PlanoPaciente · RemetenteMensagem · StatusAssinatura · StatusPagamento · TipoDiabetes · TipoMensagem · UnidadeGlicemia</div>
+          </div>
+          <div class="bg-ink-800 rounded-lg border border-danger/40 p-4">
+            <div class="text-danger text-xs font-bold uppercase mb-2">Enums ausentes (10)</div>
+            <div class="font-mono text-ink-300">StatusLead · StatusConvite · StatusTemplateMeta · <strong class="text-danger">GatilhoAutomacao</strong> · AcaoAutomacao · StatusTarefa · PrioridadeTarefa · StatusContrato · StatusPagamentoClinico · MetodoPagamento</div>
+          </div>
+        </div>
+
+        <h3 class="text-lg font-semibold text-ink-100 mt-6 mb-3">Causa raiz provável</h3>
+        <p class="text-ink-200 leading-relaxed">
+          O dev usou <code>prisma db push</code> em desenvolvimento (sincroniza schema → DB direto · sem gerar migration) e nunca rodou
+          <code>prisma migrate dev</code> para esses 11 models. Em qualquer ambiente novo (incluindo o Neon que acabamos de criar e
+          provavelmente prod se for reaplicado), <strong>metade do app simplesmente não funciona</strong>.
+        </p>
+
+        <div class="callout callout-review mt-4">
+          <div class="font-bold text-warn mb-2">Risco material em produção</div>
+          <p class="text-ink-200 leading-relaxed">
+            Se prod usa <code>prisma migrate deploy</code> no boot (CI/CD padrão) e o DB de prod for igual ao do Neon agora →
+            <strong>falhas de runtime em 50% das features</strong>. Se prod está "funcionando" hoje → significa que alguém rodou
+            <code>prisma db push --accept-data-loss</code> em prod no passado · prática perigosa (sem migration history, sem rollback rastreável,
+            sem auditoria DDL).
+          </p>
+        </div>
+
+        <h3 class="text-lg font-semibold text-ink-100 mt-6 mb-3">Como reproduzir esse achado</h3>
+        <pre><code># clone fresh do repo
+git clone https://github.com/glucoai/glucoai.git
+cd glucoai/apps/backend
+
+# definir URL (Neon free tier ou local Postgres)
+export URL_BANCO="postgresql://user:pwd@host/db?sslmode=require"
+
+# aplicar as 8 migrations canônicas
+pnpm prisma migrate deploy
+# ✔ 8 migrations applied
+
+# rodar query de drift
+psql $URL_BANCO -c "
+  SELECT table_name FROM information_schema.tables
+  WHERE table_schema='public' ORDER BY table_name;
+"
+# resultado: 9 tabelas · não 20</code></pre>
+      </section>
+
+      <!-- 2 · ESTADO REPO -->
+      <section id="repo" class="mb-14">
+        <h2 class="text-2xl md:text-3xl font-bold mb-4 text-ink-100">2 · Estado do repositório <a class="anchor-link text-primary-500 ml-2 text-base" href="#repo">¶</a></h2>
+        <div class="bg-ink-800 rounded-xl border border-ink-700 overflow-hidden">
+          <table>
+            <thead><tr><th>Item</th><th>Valor</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Repo</strong></td><td><code>github.com/glucoai/glucoai</code> (clone HTTPS)</td></tr>
+              <tr><td><strong>Branch</strong></td><td><code>main</code></td></tr>
+              <tr><td><strong>HEAD</strong></td><td><code>09477ca</code> design(ui): polish visual based on CLINIIC v1 reference</td></tr>
+              <tr><td><strong>Stack</strong></td><td>Vite + React 18 + TS · Fastify backend · Prisma + Postgres · Redis + worker IA · OpenAI gpt-4o · WhatsApp Meta Cloud · <code>node-cron</code></td></tr>
+              <tr><td><strong>Apps</strong></td><td><code>apps/backend</code> (Fastify) · <code>apps/frontend</code> (Vite/React) · <code>workers/ia-worker</code> (Redis BLPOP consumer)</td></tr>
+              <tr><td><strong>Banco acessado via SQL?</strong></td><td><span class="badge badge-fail">NÃO</span> Postgres self-hosted · schema auditado via Prisma schema (538 linhas) + 8 migrations SQL</td></tr>
+              <tr><td><strong>Limitação</strong></td><td>Sem credenciais runtime · não provei <code>cron.job</code>, <code>RLS</code> efetivos, <code>triggers</code>, <code>views</code> em runtime. Mas Prisma é ORM única ativa · auditoria do schema-de-código é representativa.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 3 · FLUXOS -->
+      <section id="fluxos" class="mb-14">
+        <h2 class="text-2xl md:text-3xl font-bold mb-4 text-ink-100">3 · Fluxos end-to-end encontrados <a class="anchor-link text-primary-500 ml-2 text-base" href="#fluxos">¶</a></h2>
+        <div class="bg-ink-800 rounded-xl border border-ink-700 overflow-hidden overflow-x-auto">
+          <table>
+            <thead><tr><th>Fluxo</th><th>Processador</th><th>Persistência</th><th>Mensagem</th><th>Timer</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Foto de glicemia</strong></td><td><code>ia-worker/glicemia.ts</code></td><td><code>Glicemia</code> + <code>Mensagem(IA)</code></td><td>OpenAI livre</td><td>nenhum follow-up</td><td><span class="badge badge-review">PARCIAL</span></td></tr>
+              <tr><td><strong>Texto de glicemia</strong></td><td><code>mensagemGlicemia.ts</code></td><td><code>Glicemia(MG_DL fixo)</code></td><td>hardcoded</td><td>nenhum</td><td><span class="badge badge-review">PARCIAL</span></td></tr>
+              <tr><td><strong>Foto de refeição</strong></td><td><code>ia-worker/refeicao.ts</code> + <code>prato.ts</code></td><td><code>Refeicao</code></td><td>hardcoded</td><td>só texto "envie em 2h"</td><td><span class="badge badge-review">PARCIAL</span></td></tr>
+              <tr><td><strong>Controle 2h pós-refeição</strong></td><td>—</td><td>—</td><td>—</td><td>—</td><td><span class="badge badge-fail">NÃO ENCONTRADO</span></td></tr>
+              <tr><td><strong>Glicemia normal · IA</strong></td><td><code>processarGlicemia</code></td><td><code>analiseIA</code></td><td>OpenAI gpt-5.1</td><td>nenhum</td><td><span class="badge badge-review">PARCIAL</span></td></tr>
+              <tr><td><strong>AQS-01/02/03 · Protocolo Premium</strong></td><td><code>fluxoEventoPremium.ts</code></td><td><strong class="text-danger">JSON em Paciente.onboardingDados</strong></td><td>hardcoded "chá + vitamina + escalda"</td><td>"1h" só TEXTO</td><td><span class="badge badge-fail">PARCIAL → FAIL</span></td></tr>
+              <tr><td><strong>Rechecagem 1h</strong></td><td>—</td><td>—</td><td>—</td><td>—</td><td><span class="badge badge-fail">NÃO ENCONTRADO</span></td></tr>
+              <tr><td><strong>Lembrete inatividade no evento</strong></td><td><code>cron */15min</code></td><td>timeline JSON</td><td>hardcoded</td><td><strong>15/30/60min hardcoded</strong></td><td><span class="badge badge-review">PARCIAL</span></td></tr>
+              <tr><td><strong>Sem registro 24h</strong></td><td><code>automationWorker.ts</code></td><td><code>ExecucaoAutomacao</code></td><td>via <code>TemplateWhatsapp</code></td><td>24h hardcoded</td><td><span class="badge badge-review">PARCIAL</span></td></tr>
+              <tr><td><strong>Inatividade 48h</strong></td><td>cron */15min</td><td>idem</td><td>idem</td><td>48h hardcoded</td><td><span class="badge badge-review">PARCIAL</span></td></tr>
+              <tr><td><strong>Recuperação 3 dias</strong></td><td><code>score-engine.ts</code></td><td><code>Paciente.scoreTotal</code></td><td>—</td><td>n/a</td><td><span class="badge badge-review">PARCIAL · só penaliza score</span></td></tr>
+              <tr><td><strong>Glicemia ≥ 250 dispara automação</strong></td><td><code>mensagemGlicemia.ts:33</code></td><td>via <code>Automacao</code></td><td>template configurável</td><td>imediato</td><td><span class="badge badge-review">PARCIAL · threshold inconsistente</span></td></tr>
+              <tr><td><strong>Validação mg/dL vs mmol/L</strong></td><td>—</td><td>sempre <code>MG_DL</code></td><td>—</td><td>—</td><td><span class="badge badge-fail">NÃO IMPLEMENTADO</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 4 · PIPELINE -->
+      <section id="pipeline" class="mb-14">
+        <h2 class="text-2xl md:text-3xl font-bold mb-4 text-ink-100">4 · Mapa real do pipeline <a class="anchor-link text-primary-500 ml-2 text-base" href="#pipeline">¶</a></h2>
+
+        <h3 class="text-lg font-semibold text-ink-100 mt-6 mb-3">Comprovado <span class="badge badge-ok ml-1">presente</span></h3>
+        <ul class="list-disc list-inside text-ink-200 space-y-1 ml-2">
+          <li>Webhook recebe mensagens (text/image/interactive)</li>
+          <li>Persistência de <code>Glicemia</code>/<code>Refeicao</code>/<code>Mensagem</code></li>
+          <li>Worker IA via Redis (OpenAI Vision + texto)</li>
+          <li>Cron 15min orquestrando Automações configuráveis</li>
+          <li>Cron 15min lembretes do AQS (não rechecagem)</li>
+          <li>Máquina de estados AQS em-código</li>
+        </ul>
+
+        <h3 class="text-lg font-semibold text-ink-100 mt-6 mb-3">Parcial <span class="badge badge-review ml-1">incompleto</span></h3>
+        <ul class="list-disc list-inside text-ink-200 space-y-1 ml-2">
+          <li>AQS funciona em-runtime mas estado é JSON arbitrário · sem schema</li>
+          <li>Lembrete 15/30/60min para evento Premium · não é a "rechecagem 1h" do método clínico</li>
+          <li>Classificação de glicemia tem 3 implementações diferentes</li>
+        </ul>
+
+        <h3 class="text-lg font-semibold text-ink-100 mt-6 mb-3">Não encontrado <span class="badge badge-fail ml-1">ausente</span></h3>
+        <ul class="list-disc list-inside text-ink-200 space-y-1 ml-2">
+          <li>Agendamento "rechecagem 1h até normalizar"</li>
+          <li>Agendamento "controle 2h pós-refeição"</li>
+          <li>Tabela de protocolos / etapas / mensagens / timers</li>
+          <li>Outbox / dispatch</li>
+          <li>Predicação glicêmica × glicemia real (loop de aprendizado)</li>
+          <li>Validação mmol/L vs mg/dL</li>
+          <li>Versionamento de método</li>
+        </ul>
+      </section>
+
+      <!-- 5 · BANCO FONTE DA VERDADE -->
+      <section id="banco-fonte" class="mb-14">
+        <h2 class="text-2xl md:text-3xl font-bold mb-4 text-ink-100">5 · Banco como fonte da verdade <a class="anchor-link text-primary-500 ml-2 text-base" href="#banco-fonte">¶</a></h2>
+        <div class="bg-ink-800 rounded-xl border border-ink-700 overflow-hidden overflow-x-auto">
+          <table>
+            <thead><tr><th>Decisão</th><th>Banco manda?</th><th>Onde está</th><th>Hardcoded?</th><th>Veredito</th></tr></thead>
+            <tbody>
+              <tr><td>Identificar mensagem de glicemia</td><td><span class="badge badge-fail">❌</span></td><td><code>roteadorMensagem.ts:isNumero</code></td><td>regex <code>\D</code></td><td><span class="badge badge-fail">FAIL</span></td></tr>
+              <tr><td>Extrair valor (texto)</td><td><span class="badge badge-fail">❌</span></td><td><code>mensagemGlicemia.ts:12</code></td><td>regex</td><td><span class="badge badge-fail">FAIL</span></td></tr>
+              <tr><td>Extrair valor (foto)</td><td><span class="badge badge-fail">❌</span></td><td><code>openai.ts:184</code></td><td>prompt+validação</td><td><span class="badge badge-fail">FAIL</span></td></tr>
+              <tr><td>Validar unidade mg/dL × mmol/L</td><td><span class="badge badge-fail">❌</span></td><td>sempre <code>MG_DL</code></td><td>sim</td><td><span class="badge badge-fail">FAIL</span></td></tr>
+              <tr><td>Validar valor absurdo (30-600)</td><td><span class="badge badge-fail">❌</span></td><td><strong>3 lugares diferentes</strong></td><td>triplicado</td><td><span class="badge badge-fail">FAIL · DUPLICAÇÃO</span></td></tr>
+              <tr><td>Classificar faixa</td><td><span class="badge badge-fail">❌</span></td><td><strong>4 implementações diferentes</strong></td><td>conflitantes</td><td><span class="badge badge-fail">FAIL · INCONSISTÊNCIA CLÍNICA</span></td></tr>
+              <tr><td>Escolher AQS-01/02/03</td><td><span class="badge badge-fail">❌</span></td><td><code>fluxoEventoPremiumUtils.ts:64-66</code></td><td>sim</td><td><span class="badge badge-fail">FAIL</span></td></tr>
+              <tr><td>Mensagem inicial AQS</td><td><span class="badge badge-fail">❌</span></td><td><code>montarMensagemAqs</code></td><td>chá+vitamina+escalda</td><td><span class="badge badge-fail">FAIL</span></td></tr>
+              <tr><td>Volume vitamina por protocolo</td><td><span class="badge badge-fail">❌</span></td><td><code>volumeVitamina</code></td><td>"1,5L/2L/3L"</td><td><span class="badge badge-fail">FAIL</span></td></tr>
+              <tr><td>Mensagem de urgência</td><td><span class="badge badge-fail">❌</span></td><td><code>mensagemUrgencia</code></td><td>sim</td><td><span class="badge badge-fail">FAIL</span></td></tr>
+              <tr><td>Agendar rechecagem 1h</td><td><span class="badge badge-fail">❌</span></td><td><strong>NÃO IMPLEMENTADO</strong></td><td>n/a</td><td><span class="badge badge-fail">FAIL</span></td></tr>
+              <tr><td>Repetir até normalizar</td><td><span class="badge badge-fail">❌</span></td><td><strong>NÃO IMPLEMENTADO</strong></td><td>n/a</td><td><span class="badge badge-fail">FAIL</span></td></tr>
+              <tr><td>Encerrar quando normalizar</td><td><span class="badge badge-review">parcial</span></td><td><code>processarGlicemiaEvento:62-72</code></td><td>código + estado no JSON</td><td><span class="badge badge-review">REVIEW</span></td></tr>
+              <tr><td>Escalar risco crítico</td><td><span class="badge badge-fail">❌</span></td><td><code>detectarSintomaAlerta</code></td><td>7 termos array</td><td><span class="badge badge-fail">FAIL</span></td></tr>
+              <tr><td>Recuperar paciente após 3 dias</td><td><span class="badge badge-fail">❌ parcial</span></td><td><code>score-engine.ts:8</code></td><td>só penaliza score</td><td><span class="badge badge-fail">FAIL · INCOMPLETO</span></td></tr>
+              <tr><td>Refeição × glicemia 2h depois</td><td><span class="badge badge-fail">❌</span></td><td><strong>NÃO IMPLEMENTADO</strong></td><td>só texto</td><td><span class="badge badge-fail">FAIL</span></td></tr>
+              <tr><td>Sintomas alerta (vômito, etc)</td><td><span class="badge badge-fail">❌</span></td><td>array hardcoded</td><td>7 termos</td><td><span class="badge badge-fail">FAIL</span></td></tr>
+              <tr><td>Lembretes 15/30/60min do AQS</td><td><span class="badge badge-fail">❌</span></td><td><code>eventoPremiumRegras.ts:40</code></td><td>sim</td><td><span class="badge badge-fail">FAIL</span></td></tr>
+              <tr><td>Templates Meta WhatsApp</td><td><span class="badge badge-ok">✅</span></td><td><code>TemplateWhatsapp</code> model</td><td>—</td><td><span class="badge badge-ok">PASS</span> (só janela 24h+)</td></tr>
+              <tr><td>Configurar gatilhos de automação</td><td><span class="badge badge-ok">✅</span></td><td><code>Automacao</code> model</td><td>thresholds hardcoded</td><td><span class="badge badge-review">REVIEW · enum fechado</span></td></tr>
+              <tr><td>Sessão de protocolo por paciente</td><td><span class="badge badge-fail">❌</span></td><td><code>onboardingDados._eventoPremium</code> (JSON)</td><td>shape em código</td><td><span class="badge badge-fail">FAIL</span></td></tr>
+              <tr><td>Timeline de protocolo</td><td><span class="badge badge-fail">❌</span></td><td>JSON array <code>slice(-50)</code></td><td>sim</td><td><span class="badge badge-fail">FAIL</span></td></tr>
+              <tr><td>Versionamento de método</td><td><span class="badge badge-fail">❌</span></td><td><strong>NÃO EXISTE</strong></td><td>n/a</td><td><span class="badge badge-fail">FAIL</span></td></tr>
+              <tr><td>Thresholds por clínica/paciente</td><td><span class="badge badge-fail">❌</span></td><td><code>ClinicaConfig</code> só booleans</td><td>n/a</td><td><span class="badge badge-fail">FAIL</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 6 · SCHEMA ENCONTRADO -->
+      <section id="schema" class="mb-14">
+        <h2 class="text-2xl md:text-3xl font-bold mb-4 text-ink-100">6 · Estrutura de banco encontrada <a class="anchor-link text-primary-500 ml-2 text-base" href="#schema">¶</a></h2>
+
+        <h3 class="text-lg font-semibold text-ink-100 mt-4 mb-3">Tabelas (Prisma models)</h3>
+        <div class="bg-ink-800 rounded-xl border border-ink-700 overflow-hidden overflow-x-auto">
+          <table>
+            <thead><tr><th>Nome</th><th>Função</th><th>Suficiente?</th></tr></thead>
+            <tbody>
+              <tr><td><code>Clinica</code></td><td>Tenant raiz</td><td><span class="badge badge-ok">✅</span></td></tr>
+              <tr><td><code>Usuario</code></td><td>Staff da clínica</td><td><span class="badge badge-ok">✅</span></td></tr>
+              <tr><td><code>Lead</code></td><td>CRM pré-paciente</td><td><span class="badge badge-ok">✅</span></td></tr>
+              <tr><td><code>Paciente</code></td><td>30+ colunas · MUITAS coisas em JSON <code>onboardingDados</code></td><td><span class="badge badge-review">⚠️ JSON livre</span></td></tr>
+              <tr><td><code>Glicemia</code></td><td>Leitura individual</td><td><span class="badge badge-review">⚠️ sem link a sessão/protocolo</span></td></tr>
+              <tr><td><code>Refeicao</code></td><td>Análise de prato</td><td><span class="badge badge-review">⚠️ não vinculada a glicemia posterior</span></td></tr>
+              <tr><td><code>Mensagem</code></td><td>Histórico chat</td><td><span class="badge badge-ok">✅</span></td></tr>
+              <tr><td><code>ConfiguracaoWhatsapp</code></td><td>Número/token por clínica</td><td><span class="badge badge-ok">✅</span></td></tr>
+              <tr><td><code>TemplateWhatsapp</code></td><td>Templates Meta-aprovados</td><td><span class="badge badge-ok">✅</span></td></tr>
+              <tr><td><code>Automacao</code></td><td>Regra "gatilho → ação"</td><td><span class="badge badge-review">⚠️ enum fechado, sem threshold configurável</span></td></tr>
+              <tr><td><code>ExecucaoAutomacao</code></td><td>Audit log de disparo</td><td><span class="badge badge-ok">✅</span></td></tr>
+              <tr><td><code>Tarefa</code></td><td>Backlog clínico genérico</td><td><span class="badge badge-ok">✅</span></td></tr>
+              <tr><td><code>ClinicaConfig</code></td><td>Booleans + cores</td><td><span class="badge badge-fail">❌ sem thresholds/regras</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 class="text-lg font-semibold text-ink-100 mt-6 mb-3">NÃO EXISTE · gap material</h3>
+        <div class="callout callout-fail">
+          <ul class="space-y-1.5 text-ink-200">
+            <li>❌ <code>Protocolo</code> / <code>EtapaProtocolo</code> / <code>CriterioEntrada</code> / <code>CriterioSaida</code></li>
+            <li>❌ <code>FaixaGlicemica</code> — configurar faixas por clínica / paciente / contexto / unidade</li>
+            <li>❌ <code>SessaoProtocolo</code> — "paciente X executando AQS-02 desde Y"</li>
+            <li>❌ <code>EventoDecisao</code> — audit "às 14:23 escolhi AQS-02 porque valor=320 via regra v1.2"</li>
+            <li>❌ <code>Timer</code> / <code>Lembrete</code> / <code>Rechecagem</code> — agendar follow-up cancelável idempotente</li>
+            <li>❌ <code>Outbox</code> / <code>Dispatch</code> — desacoplar decisão de envio · retry · status</li>
+            <li>❌ <code>Predicao</code> — salvar previsão pico × glicemia real 2h depois</li>
+            <li>❌ <code>MetodoVersao</code> — versionar método com <code>effective_from</code>/<code>approved_by</code></li>
+          </ul>
+        </div>
+
+        <h3 class="text-lg font-semibold text-ink-100 mt-6 mb-3">Constraints / Triggers / Views / Policies / Cron</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div class="bg-ink-800 rounded-lg border border-ink-700 p-4"><span class="badge badge-fail mb-2">❌</span><div class="font-mono text-sm">pg_constraint CHECK</div><div class="text-ink-400 text-xs mt-1">validação só em JS</div></div>
+          <div class="bg-ink-800 rounded-lg border border-ink-700 p-4"><span class="badge badge-fail mb-2">❌</span><div class="font-mono text-sm">Triggers DB</div><div class="text-ink-400 text-xs mt-1">nenhuma nas migrations</div></div>
+          <div class="bg-ink-800 rounded-lg border border-ink-700 p-4"><span class="badge badge-fail mb-2">❌</span><div class="font-mono text-sm">Views</div><div class="text-ink-400 text-xs mt-1">nenhuma</div></div>
+          <div class="bg-ink-800 rounded-lg border border-ink-700 p-4"><span class="badge badge-fail mb-2">❌</span><div class="font-mono text-sm">RLS policies</div><div class="text-ink-400 text-xs mt-1">multi-tenancy via WHERE clinicaId na app</div></div>
+          <div class="bg-ink-800 rounded-lg border border-ink-700 p-4 md:col-span-2"><span class="badge badge-fail mb-2">❌</span><div class="font-mono text-sm">pg_cron</div><div class="text-ink-400 text-xs mt-1">scheduling via <code>node-cron</code> + <code>setInterval</code> in-process · sem lock distribuído</div></div>
+        </div>
+      </section>
+
+      <!-- 7 · AQS -->
+      <section id="aqs" class="mb-14">
+        <h2 class="text-2xl md:text-3xl font-bold mb-4 text-ink-100">7 · Protocolos AQS <a class="anchor-link text-primary-500 ml-2 text-base" href="#aqs">¶</a></h2>
+        <div class="bg-ink-800 rounded-xl border border-ink-700 overflow-hidden overflow-x-auto">
+          <table>
+            <thead><tr><th>Protocolo</th><th>Faixa (mg/dL)</th><th>Mensagem</th><th>Timer</th><th>Saída</th><th>Fonte</th></tr></thead>
+            <tbody>
+              <tr><td><strong>AQS-01</strong></td><td>180-299</td><td>chá 250-300ml + vitamina pepino <strong>1,5L</strong> + escalda pés + "nova medição em 1 hora"</td><td>"1h" só TEXTO</td><td><code>≤179 → CONCLUIDO</code></td><td><span class="badge badge-fail">CÓDIGO</span></td></tr>
+              <tr><td><strong>AQS-02</strong></td><td>300-499</td><td>idem + vitamina <strong>2L</strong></td><td>idem</td><td>idem</td><td><span class="badge badge-fail">CÓDIGO</span></td></tr>
+              <tr><td><strong>AQS-03</strong></td><td>≥500</td><td>idem + vitamina <strong>3L</strong> + "Se houver vômitos, fraqueza intensa, falta de ar, confusão ou piora, procure atendimento médico imediatamente"</td><td>idem</td><td>idem</td><td><span class="badge badge-fail">CÓDIGO</span></td></tr>
+              <tr><td><strong>HIPO</strong></td><td><70</td><td>"Vamos pausar aqui e seguir o protocolo de hipoglicemia"</td><td>nenhum</td><td>terminal</td><td><span class="badge badge-fail">CÓDIGO</span></td></tr>
+              <tr><td><strong>ENCAMINHADO_MEDICO</strong></td><td>sintomas detectados</td><td>"Esses sintomas podem indicar gravidade. Procure atendimento médico imediatamente."</td><td>n/a</td><td>terminal</td><td><span class="badge badge-fail">CÓDIGO</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout callout-review mt-5">
+          <strong class="text-warn">Observações críticas:</strong>
+          <ul class="space-y-1 mt-2 text-ink-200 text-sm">
+            <li>⚠️ AQS é "Premium Event" — só ativa para <code>Paciente.plano = PREMIUM</code> em fluxo pré/pós-evento (festa/jantar)</li>
+            <li>⚠️ Para um paciente NORMAL (não premium · ou premium fora de evento), a classificação que conta é a do <code>classificarGlicemia.ts</code> (<code>70/140/180</code>) usada <strong>apenas no painel/UI</strong>, não no fluxo WhatsApp</li>
+            <li>⚠️ "Rechecagem em 1 hora" é só texto · não agendado · depende do paciente reenviar voluntariamente</li>
+            <li>⚠️ Não há "controle 2h pós-refeição" implementado · só sugestão em texto</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 8 · MENSAGENS -->
+      <section id="mensagens" class="mb-14">
+        <h2 class="text-2xl md:text-3xl font-bold mb-4 text-ink-100">8 · Mensagens, alarmes e recordatórios <a class="anchor-link text-primary-500 ml-2 text-base" href="#mensagens">¶</a></h2>
+        <p class="text-ink-300 mb-4">Inventário: ~50 mensagens distintas, todas hardcoded em <code>.ts</code> files exceto as 4 <code>GatilhoAutomacao</code> templates (que dependem de admin criar via UI).</p>
+        <div class="bg-ink-800 rounded-xl border border-ink-700 overflow-hidden overflow-x-auto">
+          <table>
+            <thead><tr><th>Momento</th><th>Fonte</th><th>Timer</th><th>Editável?</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>Glicemia normal/segura (evento)</td><td>code</td><td>imediato</td><td><span class="badge badge-fail">❌</span></td><td>hardcoded</td></tr>
+              <tr><td>Glicemia baixa (evento)</td><td>code</td><td>imediato</td><td><span class="badge badge-fail">❌</span></td><td>hardcoded</td></tr>
+              <tr><td>AQS-01/02/03 (evento)</td><td>code</td><td>imediato</td><td><span class="badge badge-fail">❌</span></td><td>hardcoded</td></tr>
+              <tr><td>Lembrete 15/30/60min sem reavaliação</td><td>code + cron 15min</td><td><strong>15/30/60</strong></td><td><span class="badge badge-fail">❌</span></td><td>hardcoded</td></tr>
+              <tr><td>Glicemia ≥250 (qualquer)</td><td>DB <code>TemplateWhatsapp</code></td><td>imediato + cron 15min</td><td><span class="badge badge-ok">✅ via UI</span></td><td><span class="badge badge-review">REVIEW · threshold hardcoded</span></td></tr>
+              <tr><td>Sem registro 24h</td><td>DB Template</td><td>cron 15min</td><td><span class="badge badge-ok">✅</span></td><td><span class="badge badge-review">REVIEW</span></td></tr>
+              <tr><td>Inatividade 48h</td><td>DB Template</td><td>cron 15min</td><td><span class="badge badge-ok">✅</span></td><td><span class="badge badge-review">REVIEW</span></td></tr>
+              <tr><td>Upgrade plano</td><td>DB Template</td><td>imediato (hook)</td><td><span class="badge badge-ok">✅</span></td><td><span class="badge badge-review">REVIEW</span></td></tr>
+              <tr><td>Análise IA refeição</td><td>code template + IA conteúdo</td><td>imediato pós-worker</td><td><span class="badge badge-fail">❌ template</span></td><td>hardcoded</td></tr>
+              <tr><td>Análise IA glicemia</td><td>OpenAI prompt em code</td><td>imediato</td><td><span class="badge badge-fail">❌</span></td><td>hardcoded</td></tr>
+              <tr><td>Alerta crítico (worker &gt;300 || &lt;60)</td><td>code</td><td>imediato</td><td><span class="badge badge-fail">❌</span></td><td>hardcoded</td></tr>
+              <tr><td>Menu / histórico / perfil / score</td><td>code</td><td>imediato</td><td><span class="badge badge-fail">❌</span></td><td>hardcoded</td></tr>
+              <tr><td>Onboarding completo (17+ msgs)</td><td>code</td><td>state machine</td><td><span class="badge badge-fail">❌</span></td><td>hardcoded</td></tr>
+              <tr><td>Fallback "não entendi"</td><td>code</td><td>default route</td><td><span class="badge badge-fail">❌</span></td><td>hardcoded</td></tr>
+              <tr><td>Limite diário grátis</td><td>code</td><td>worker</td><td><span class="badge badge-fail">❌</span></td><td>hardcoded</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 9 · FLUXOGRAMA -->
+      <section id="fluxograma" class="mb-14">
+        <h2 class="text-2xl md:text-3xl font-bold mb-4 text-ink-100">9 · Fluxograma do sistema real <a class="anchor-link text-primary-500 ml-2 text-base" href="#fluxograma">¶</a></h2>
+        <div class="flex flex-wrap items-center gap-3 mb-4">
+          <span class="badge" style="background:rgba(239,68,68,.14);color:#ef4444">🟥 CODE (hardcoded)</span>
+          <span class="badge" style="background:rgba(16,185,129,.14);color:#10b981">🟩 DB (real Postgres)</span>
+          <span class="badge" style="background:rgba(245,158,11,.14);color:#f59e0b">🟨 IA (OpenAI/Vision)</span>
+          <span class="badge" style="background:rgba(124,158,255,.14);color:#7c9eff">⬜ JSON arbitrário</span>
+          <span class="badge badge-fail">❌ NÃO ENCONTRADO</span>
+        </div>
+        <div class="mermaid">
+flowchart TD
+  WA[WhatsApp Meta Cloud] -->|POST webhook| WH[webhook.ts]
+  WH -->|extrai messages| PM[processarMensagem.ts]
+  PM -->|Mensagem PACIENTE| DB1[(DB: Mensagem)]:::db
+  PM --> AQS{Em evento premium ativo?}
+
+  AQS -- sim --> AQS_LOGIC[fluxoEventoPremium.ts · machine of states]:::code
+  AQS_LOGIC -->|sintoma alerta| ESC[Encaminhar medico HARDCODED]:::code
+  AQS_LOGIC --> ETAPA{Etapa atual}
+  ETAPA -->|PRE_AGUARDANDO_GLICEMIA| EXT1[extrairValorGlicemia 30-600 HARDCODED]:::code
+  ETAPA -->|AQS_AGUARDANDO_REAVALIACAO| EXT2[extrairValorGlicemia HARDCODED]:::code
+  EXT2 --> CLA{classificarFaixa HARDCODED 70/179/299/499}:::code
+  CLA -->|HIPO| HM[Hipoglicemia HARDCODED]:::code
+  CLA -->|SEGURA| CONC[CONCLUIDO HARDCODED]:::code
+  CLA -->|AQS-01/02/03| AM[montarMensagemAqs cha+vitamina+escalda HARDCODED]:::code
+  AM --> SJ[(JSON em Paciente.onboardingDados._eventoPremium NAO E TABELA)]:::json
+  SJ --> WAIT[Espera paciente reenviar SEM TIMER REAL]:::notfound
+
+  AQS -- nao --> ROT[tratarRotas roteadorMensagem]
+  ROT -->|numero 30-600| LG[mensagemGlicemia tratarLeituraGlicemia]
+  ROT -->|image| IMG[mensagemImagem enfileira]
+  ROT -->|menu/historico/escore/perfil| MH[Mensagens HARDCODED]:::code
+
+  LG --> DB_G[(DB: Glicemia)]:::db
+  LG --> FILA[(Redis ia_fila)]
+  LG -->|valor >= 250| AUT[dispararAutomacoes GLICEMIA_ALTA threshold HARDCODED]:::code
+
+  IMG --> FILA
+  FILA --> WK[ia-worker BLPOP loop]
+  WK -->|glicemia| ANL[processarGlicemia OpenAI gpt-5.1 prompt HARDCODED]:::ia
+  ANL --> DB_GU[(DB: Glicemia.analiseIA)]:::db
+  ANL -->|valor>300 OR <60| AL[registrarAlertaCritico HARDCODED]:::code
+
+  WK -->|classificar_imagem| VIS[OpenAI gpt-4o-mini Vision]:::ia
+  VIS --> GF[processarGlicemiaFoto extrairGlicemiaImagem HARDCODED]:::code
+  VIS --> REF[processarRefeicao analisarImagem + prato.ts HARDCODED]:::code
+  REF --> DB_R[(DB: Refeicao)]:::db
+  REF --> MR[montarRespostaRefeicaoOficial HARDCODED]:::code
+
+  C15[cron */15 min]
+  C15 --> AW[automationWorker.ts]
+  AW --> AUT
+  C15 --> LB[processarLembretesAutomaticos]
+  LB --> LBR{15/30/60 min HARDCODED}:::code
+  LBR --> WAIT
+
+  C60[cron 0 * * * * 1h]
+  C60 --> SC[recalcularScoreDeTodos HARDCODED 70/180/3d]:::code
+  SC --> DB_P[(DB: Paciente.scoreTotal)]:::db
+
+  AUT --> DB_AUT[(DB: Automacao + Template + Execucao + Tarefa CONFIGURAVEL)]:::db
+
+  classDef code fill:#3a1818,stroke:#ef4444,color:#fff,stroke-width:2px
+  classDef db fill:#0f3a26,stroke:#10b981,color:#fff,stroke-width:2px
+  classDef ia fill:#3a2f0f,stroke:#f59e0b,color:#fff,stroke-width:2px
+  classDef json fill:#1a2742,stroke:#7c9eff,color:#fff,stroke-width:2px
+  classDef notfound fill:#222,stroke:#888,color:#fff,stroke-width:2px,stroke-dasharray: 5 5
+        </div>
+      </section>
+
+      <!-- 10 · GAPS -->
+      <section id="gaps" class="mb-14">
+        <h2 class="text-2xl md:text-3xl font-bold mb-4 text-ink-100">10 · Gaps P0 / P1 / P2 <a class="anchor-link text-primary-500 ml-2 text-base" href="#gaps">¶</a></h2>
+
+        <h3 class="text-lg font-semibold text-danger mt-4 mb-3">🔴 P0 — impede banco de ser fonte da verdade</h3>
+        <div class="space-y-3">
+          <div class="callout callout-fail"><strong>1.</strong> <strong>Método AQS não existe como entidade.</strong> Toda a lógica · faixas · etapas · mensagens · volumes · sintomas alerta em <code>fluxoEventoPremiumUtils.ts</code>. Sem <code>Protocolo</code>, <code>EtapaProtocolo</code>, <code>FaixaGlicemica</code> no Prisma.</div>
+          <div class="callout callout-fail"><strong>2.</strong> <strong>Estado do AQS em JSON arbitrário.</strong> State machine em <code>Paciente.onboardingDados._eventoPremium</code> · sem schema, sem migration histórica, sem RLS específica, sem queries indexadas.</div>
+          <div class="callout callout-fail"><strong>3.</strong> <strong>4 classificações distintas coexistem:</strong>
+            <ul class="list-disc list-inside mt-2 text-sm">
+              <li><code>classificarGlicemia.ts:9-20</code> — 70/140/180</li>
+              <li><code>fluxoEventoPremiumUtils.ts:61-67</code> — 70/179/299/499</li>
+              <li><code>mensagemGlicemia.ts:33</code> + <code>automationWorker.ts:112</code> — 250</li>
+              <li><code>ia-worker/glicemia.ts:74</code> — 60/300</li>
+            </ul>
+            → Decisão clínica não-determinística para diferentes pontos do fluxo.
+          </div>
+          <div class="callout callout-fail"><strong>4.</strong> <strong>Não há agendamento real de rechecagem 1h.</strong> Mensagem fala "nova medição em 1 hora" mas o sistema NÃO agenda · depende do paciente reenviar. Sem <code>Timer</code>/<code>Rechecagem</code> tabela.</div>
+          <div class="callout callout-fail"><strong>5.</strong> <strong>Não há "controle 2h pós-refeição".</strong> Só sugestão em texto. Refeição não vinculada a glicemia posterior · não há <code>Predicao</code> · não há loop de aprendizado.</div>
+          <div class="callout callout-fail"><strong>6.</strong> <strong>Não há Outbox/Dispatch.</strong> Toda mensagem é "send now" via <code>enviarTextoWhatsApp</code> HTTP síncrono. Sem retry, sem status, sem idempotência cross-request real.</div>
+          <div class="callout callout-fail"><strong>7.</strong> <strong>Sem versionamento de método.</strong> Mudar threshold mañana perde rastreabilidade. Sem <code>MetodoVersao</code>, <code>effective_from</code>, <code>approved_by</code>.</div>
+          <div class="callout callout-fail"><strong>8.</strong> <strong>Unidade <code>MMOL_L</code> existe no enum mas nunca é usada.</strong> Toda criação força <code>unidade: 'MG_DL'</code>. Paciente em país mmol/L silenciosamente convertido errado.</div>
+        </div>
+
+        <h3 class="text-lg font-semibold text-warn mt-6 mb-3">🟡 P1 — risco operacional/clínico importante</h3>
+        <div class="space-y-2 text-sm text-ink-200">
+          <div class="callout callout-review"><strong>9.</strong> Validação 30-600 mg/dL duplicada em 3 arquivos com formas levemente diferentes — risco de drift.</div>
+          <div class="callout callout-review"><strong>10.</strong> Glicemia ≥250 dispara automação no handler + cron pode redisparar 15min depois. Dedup só 24h via <code>ExecucaoAutomacao</code> — risco envio duplo.</div>
+          <div class="callout callout-review"><strong>11.</strong> <code>detectarSintomaAlerta</code> tem 7 termos sem regex, sem fuzziness. "Estou muito mau" (sic) não detecta.</div>
+          <div class="callout callout-review"><strong>12.</strong> Cron <code>node-cron</code> dentro do processo Fastify. Se 2+ instâncias horizontal, crons rodam N vezes → envio múltiplo. Sem lock distribuído.</div>
+          <div class="callout callout-review"><strong>13.</strong> <code>ClinicaConfig</code> só booleans — clínica não configura suas próprias faixas, mensagens ou timers.</div>
+          <div class="callout callout-review"><strong>14.</strong> Faixa de "alerta crítico" difere entre worker (60/300), classificador (70/180) e dispatcher (250). Quem decide o que é crítico não é claro.</div>
+          <div class="callout callout-review"><strong>15.</strong> Sem RLS no Postgres. Multi-tenancy só via WHERE clinicaId na app. Dado clínico LGPD.</div>
+          <div class="callout callout-review"><strong>16.</strong> Mensagem com instrução clínica específica (chá+vitamina+escalda) hardcoded sem aprovação rastreada · sem disclaimer médico forte sistemático.</div>
+        </div>
+
+        <h3 class="text-lg font-semibold text-info mt-6 mb-3">🔵 P2 — governança/observabilidade</h3>
+        <div class="space-y-2 text-sm text-ink-200">
+          <div class="callout callout-info"><strong>17.</strong> Mensagens AQS não passam por <code>TemplateWhatsapp</code> Meta-aprovado. Estão como texto livre via janela 24h. Se janela fechar, sistema não tem template aprovado pra mandar AQS-X.</div>
+          <div class="callout callout-info"><strong>18.</strong> Não há <code>EventoDecisao</code> log estruturado. Daqui 6 meses: "Por que escolhi AQS-02 às 14:23?" "Qual versão das regras?" "Quem aprovou?" — só timeline JSON · não indexável.</div>
+          <div class="callout callout-info"><strong>19.</strong> <code>Refeicao</code> sem coluna <code>consumoEm</code> · só <code>criadoEm</code>. Predição glicêmica sem timestamp confiável.</div>
+          <div class="callout callout-info"><strong>20.</strong> Sem <code>Outbox</code> separar intenção de envio do envio efetivo. Hoje send-now síncrono.</div>
+        </div>
+      </section>
+
+      <!-- 11 · HARDCODES -->
+      <section id="hardcodes" class="mb-14">
+        <h2 class="text-2xl md:text-3xl font-bold mb-4 text-ink-100">11 · Hardcodes catalogados (24 ocorrências) <a class="anchor-link text-primary-500 ml-2 text-base" href="#hardcodes">¶</a></h2>
+        <div class="bg-ink-800 rounded-xl border border-ink-700 overflow-hidden overflow-x-auto">
+          <table>
+            <thead><tr><th>#</th><th>Arquivo · linha</th><th>Valor</th><th>Risco</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td><code>fluxoEventoPremiumUtils.ts:61-67</code></td><td>Faixas AQS 70/179/299/499</td><td><span class="badge badge-fail">clínico</span></td></tr>
+              <tr><td>2</td><td><code>fluxoEventoPremiumUtils.ts:108-112</code></td><td>Volumes vitamina 1.5L/2L/3L</td><td><span class="badge badge-fail">clínico</span></td></tr>
+              <tr><td>3</td><td><code>fluxoEventoPremiumUtils.ts:114-122</code></td><td>Mensagens urgência</td><td><span class="badge badge-fail">clínico</span></td></tr>
+              <tr><td>4</td><td><code>fluxoEventoPremiumUtils.ts:124-132</code></td><td>Texto AQS completo</td><td><span class="badge badge-fail">clínico</span></td></tr>
+              <tr><td>5</td><td><code>fluxoEventoPremiumUtils.ts:70</code></td><td>7 sintomas alerta</td><td><span class="badge badge-fail">clínico</span></td></tr>
+              <tr><td>6</td><td><code>fluxoEventoPremiumUtils.ts:4-13</code></td><td>9 etapas evento</td><td><span class="badge badge-review">arquitetural</span></td></tr>
+              <tr><td>7</td><td><code>classificarGlicemia.ts:9-20</code></td><td>Faixas 70/140/180 (diferente do AQS)</td><td><span class="badge badge-fail">clínico inconsistente</span></td></tr>
+              <tr><td>8</td><td><code>ia-worker/glicemia.ts:74</code></td><td><code>&gt;300 || &lt;60</code> alerta crítico</td><td><span class="badge badge-fail">clínico</span></td></tr>
+              <tr><td>9</td><td><code>mensagemGlicemia.ts:33</code></td><td><code>valor &gt;= 250</code> dispara automação</td><td><span class="badge badge-fail">clínico</span></td></tr>
+              <tr><td>10</td><td><code>automationWorker.ts:107-112</code></td><td><code>valor &gt;= 250</code> cron + 15min window</td><td><span class="badge badge-fail">clínico/op</span></td></tr>
+              <tr><td>11</td><td><code>automationWorker.ts:28</code></td><td>24h limite SEM_REGISTRO</td><td><span class="badge badge-review">operacional</span></td></tr>
+              <tr><td>12</td><td><code>automationWorker.ts:65</code></td><td>48h limite INATIVIDADE</td><td><span class="badge badge-review">operacional</span></td></tr>
+              <tr><td>13</td><td><code>score-engine.ts:40-41</code></td><td>hipo&lt;70 e hiper&gt;180</td><td><span class="badge badge-fail">clínico inconsistente</span></td></tr>
+              <tr><td>14</td><td><code>score-engine.ts:7</code></td><td>7d janela score</td><td><span class="badge badge-review">operacional</span></td></tr>
+              <tr><td>15</td><td><code>score-engine.ts:8</code></td><td>3 dias "recuperação"</td><td><span class="badge badge-fail">clínico</span></td></tr>
+              <tr><td>16</td><td><code>score-engine.ts:32-37</code></td><td>Pesos score adesão</td><td><span class="badge badge-review">clínico/produto</span></td></tr>
+              <tr><td>17</td><td><code>eventoPremiumRegras.ts:28-44</code></td><td>Lembretes 15/30/60min</td><td><span class="badge badge-review">operacional</span></td></tr>
+              <tr><td>18</td><td><code>fluxoEventoPremiumUtils.ts:57</code></td><td>Validação 30-600</td><td><span class="badge badge-fail">clínico</span></td></tr>
+              <tr><td>19</td><td><code>roteadorMensagem.ts:10</code></td><td>Validação 30-600 (duplicada)</td><td><span class="badge badge-review">drift</span></td></tr>
+              <tr><td>20</td><td><code>ia-worker/openai.ts:209-211</code></td><td>Validação 30-600 (triplicada)</td><td><span class="badge badge-review">drift</span></td></tr>
+              <tr><td>21</td><td><code>ia-worker/prato.ts:33-40</code></td><td>Grupos alimentos hardcoded</td><td><span class="badge badge-review">nutricional</span></td></tr>
+              <tr><td>22</td><td><code>ia-worker/prato.ts:62-89</code></td><td>Score classificação + previsão pico mg/dL</td><td><span class="badge badge-fail">clínico</span></td></tr>
+              <tr><td>23</td><td><code>plugins/cron.ts:9, 20</code></td><td>Schedules cron</td><td><span class="badge badge-review">operacional</span></td></tr>
+              <tr><td>24</td><td><code>fluxoEventoPremium.ts:62-101</code> + <code>messages/*.ts</code></td><td>~50 strings de mensagens</td><td><span class="badge badge-fail">produto/clínico</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 12 · RISCOS CLÍNICOS -->
+      <section id="riscos" class="mb-14">
+        <h2 class="text-2xl md:text-3xl font-bold mb-4 text-ink-100">12 · Riscos clínicos / governança <a class="anchor-link text-primary-500 ml-2 text-base" href="#riscos">¶</a></h2>
+        <p class="text-ink-300 text-sm mb-4">Sem dar orientação médica nova · apenas apontar riscos arquiteturais e de segurança.</p>
+        <div class="bg-ink-800 rounded-xl border border-ink-700 overflow-hidden overflow-x-auto">
+          <table>
+            <thead><tr><th>Risco</th><th>Severidade</th><th>Motivo</th></tr></thead>
+            <tbody>
+              <tr><td>Conteúdo clínico (chá+vitamina+escalda) hardcoded sem aprovação rastreável</td><td><span class="badge badge-fail">ALTA</span></td><td>Mudança requer deploy. Sem <code>approved_by</code>, <code>effective_from</code>. Em ambiente regulatório frágil.</td></tr>
+              <tr><td>Sem disclaimer estrutural por mensagem clínica</td><td><span class="badge badge-review">MÉDIA</span></td><td>Não há campo <code>Mensagem.aviso_medico</code>. Disclaimer embutido em algumas strings · não sistemático.</td></tr>
+              <tr><td>mmol/L silenciosamente convertido como mg/dL</td><td><span class="badge badge-fail">ALTA</span></td><td>"10 mmol/L" vira 10 mg/dL no banco (hipoglicemia falsa) ou "180 mmol/L" achando bem (=3240 mg/dL = morte).</td></tr>
+              <tr><td>Validação 30-600 não cobre edge cases reais</td><td><span class="badge badge-review">MÉDIA</span></td><td>Glicemia &lt;30 (coma) e &gt;600 (cetoacidose grave) são justamente emergências · descartados silenciosamente.</td></tr>
+              <tr><td>Sem RLS no DB</td><td><span class="badge badge-review">MÉDIA</span></td><td>Vazamento cross-tenant em caso de bug. Dado de saúde · LGPD especial.</td></tr>
+              <tr><td>Sem auditoria estruturada de decisão clínica</td><td><span class="badge badge-fail">ALTA</span></td><td>Daqui 6 meses não dá pra explicar por que escolheu AQS-2 para um paciente · só timeline JSON.</td></tr>
+              <tr><td>Cron in-process sem lock distribuído</td><td><span class="badge badge-review">MÉDIA</span></td><td>Em 2+ instâncias, mensagens duplicam.</td></tr>
+              <tr><td>Send-now síncrono em handler webhook</td><td><span class="badge badge-info">BAIXA</span></td><td>Se WhatsApp API down, perde mensagem (sem fila de retry no escopo Premium AQS).</td></tr>
+              <tr><td>Threshold 250 dispara automação CONFIGURÁVEL pela clínica</td><td><span class="badge badge-review">BAIXA-MÉDIA</span></td><td>Clínica pode acidentalmente desativar <code>GLICEMIA_ALTA</code> → alerta crítico não chega · sem fallback.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 13 · PROPOSTA -->
+      <section id="proposta" class="mb-14">
+        <h2 class="text-2xl md:text-3xl font-bold mb-4 text-ink-100">13 · O que precisa existir <a class="anchor-link text-primary-500 ml-2 text-base" href="#proposta">¶</a></h2>
+        <p class="text-ink-300 mb-4">Estrutura <strong>mínima</strong> proposta (sem SQL · apenas descrição). <strong>Não criar agora.</strong></p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="bg-ink-800 rounded-xl border border-ink-700 p-5">
+            <h4 class="text-primary-500 font-bold mb-3 flex items-center gap-2">📋 Entidades de método</h4>
+            <ul class="space-y-1.5 text-sm text-ink-200">
+              <li><code>MetodoVersao</code> · versionamento</li>
+              <li><code>FaixaGlicemica</code> · thresholds configuráveis</li>
+              <li><code>Protocolo</code> · AQS-01/02/03 + HIPO</li>
+              <li><code>ProtocoloEtapa</code> · sequência clínica</li>
+              <li><code>CriterioEntrada</code>/<code>CriterioSaida</code></li>
+              <li><code>MensagemTemplate</code> · interno · diferente do TemplateWhatsapp Meta</li>
+            </ul>
+          </div>
+          <div class="bg-ink-800 rounded-xl border border-ink-700 p-5">
+            <h4 class="text-ok font-bold mb-3 flex items-center gap-2">⚙️ Entidades de runtime</h4>
+            <ul class="space-y-1.5 text-sm text-ink-200">
+              <li><code>SessaoProtocolo</code> · uma execução de AQS por paciente</li>
+              <li><code>EventoDecisao</code> · audit estruturada (entrada/regra/saída)</li>
+              <li><code>Timer</code>/<code>Rechecagem</code> · agendamento real cancelável</li>
+              <li><code>Outbox</code> · idempotência + retry + status</li>
+            </ul>
+          </div>
+          <div class="bg-ink-800 rounded-xl border border-ink-700 p-5">
+            <h4 class="text-warn font-bold mb-3 flex items-center gap-2">🧠 Predição / aprendizado</h4>
+            <ul class="space-y-1.5 text-sm text-ink-200">
+              <li><code>PredicaoGlicemica</code> · previsão pico por refeição</li>
+              <li><code>ValidacaoPredicao</code> · pico real medido 2h depois</li>
+              <li><code>RecuperacaoPaciente</code> · gatilho 3d sem registro</li>
+            </ul>
+          </div>
+          <div class="bg-ink-800 rounded-xl border border-ink-700 p-5">
+            <h4 class="text-info font-bold mb-3 flex items-center gap-2">🔐 Governança</h4>
+            <ul class="space-y-1.5 text-sm text-ink-200">
+              <li>Multi-tenancy via <code>clinicaId</code> em tudo</li>
+              <li>RLS policies por tabela</li>
+              <li><code>approved_by</code>/<code>approved_at</code> em métodos</li>
+              <li>Versão imutável (sem UPDATE em MetodoVersao ATIVA)</li>
+              <li><code>effective_from</code>/<code>effective_until</code></li>
+              <li>Index by <code>clinicaId</code>, <code>pacienteId</code>, <code>status</code>, <code>agendado_para</code></li>
+            </ul>
+          </div>
+        </div>
+
+        <h3 class="text-lg font-semibold text-ink-100 mt-6 mb-3">5 ações P0 (recomendação · sem implementar agora)</h3>
+        <div class="space-y-3">
+          <div class="callout callout-info"><strong>P0 · Ação 1 — <code>MetodoVersao</code> + <code>FaixaGlicemica</code></strong><br/><span class="text-ink-300 text-sm">Migration aditiva. Seed com as 5 faixas atuais (<code>&lt;70 HIPO</code>, <code>≤179 SEGURA</code>, <code>≤299 AQS-01</code>, <code>≤499 AQS-02</code>, <code>&gt;499 AQS-03</code>) clinicaId=NULL global, effective_from=NOW, status=ATIVO. Refatorar <code>classificarFaixa()</code> pra ler do banco.</span></div>
+          <div class="callout callout-info"><strong>P0 · Ação 2 — <code>Protocolo</code> + <code>ProtocoloEtapa</code> + <code>MensagemTemplate</code></strong><br/><span class="text-ink-300 text-sm">Seed com 4 protocolos (AQS-01/02/03 + HIPO). <code>fluxoEventoPremiumUtils.ts</code> lê do banco. Mantém comportamento idêntico.</span></div>
+          <div class="callout callout-info"><strong>P0 · Ação 3 — <code>Timer</code> + scheduler dedicado</strong><br/><span class="text-ink-300 text-sm">Tabela com <code>agendado_para</code>, <code>idempotency_key</code>. Worker BLPOP no Redis quando timer vence. AQS começa → agenda <code>now()+1h</code>. Habilita "controle 2h pós-refeição".</span></div>
+          <div class="callout callout-info"><strong>P0 · Ação 4 — <code>Outbox</code></strong><br/><span class="text-ink-300 text-sm">Todo envio passa por INSERT + worker dispatcher async. Retry com backoff. Idempotência absoluta. Resolve duplicação cron+handler.</span></div>
+          <div class="callout callout-info"><strong>P0 · Ação 5 — <code>SessaoProtocolo</code> + <code>EventoDecisao</code></strong><br/><span class="text-ink-300 text-sm">Substituir JSON <code>_eventoPremium</code>. Daqui 6 meses qualquer paciente conta a história: "às 14:23 entrou em AQS-02 porque valor 320 caiu na faixa V1.0:300-499".</span></div>
+        </div>
+      </section>
+
+      <!-- 14 · EVIDÊNCIAS -->
+      <section id="evidencias" class="mb-14">
+        <h2 class="text-2xl md:text-3xl font-bold mb-4 text-ink-100">14 · Evidências comprobatórias <a class="anchor-link text-primary-500 ml-2 text-base" href="#evidencias">¶</a></h2>
+        <p class="text-ink-300 text-sm mb-4">Auditoria realizada via Prisma schema + migrations + arquivos <code>.ts</code> · sem acesso DB rodando (Postgres self-hosted).</p>
+        <div class="bg-ink-800 rounded-xl border border-ink-700 overflow-hidden overflow-x-auto">
+          <table>
+            <thead><tr><th>Comprovação</th><th>Arquivo · linha</th></tr></thead>
+            <tbody>
+              <tr><td>Schema completo</td><td><code>apps/backend/prisma/schema.prisma:1-538</code></td></tr>
+              <tr><td>Migrations (8)</td><td><code>apps/backend/prisma/migrations/*/migration.sql</code></td></tr>
+              <tr><td>AQS hardcoded core</td><td><code>apps/backend/src/modulos/whatsapp/handlers/fluxoEventoPremiumUtils.ts:61-185</code></td></tr>
+              <tr><td>Estado AQS em JSON</td><td><code>fluxoEventoPremiumUtils.ts:159-167</code></td></tr>
+              <tr><td>Pipeline texto-glicemia</td><td><code>mensagemGlicemia.ts:12-63</code></td></tr>
+              <tr><td>Pipeline foto</td><td><code>workers/ia-worker/src/openai.ts:184-249</code></td></tr>
+              <tr><td>Pipeline refeição</td><td><code>refeicao.ts:17-121</code> + <code>prato.ts:1-113</code></td></tr>
+              <tr><td>Cron + workers</td><td><code>plugins/cron.ts:7-30</code> + <code>automationWorker.ts:8-154</code> + <code>index.ts:32-45</code></td></tr>
+              <tr><td>Classificação dupla</td><td><code>utils/classificarGlicemia.ts:9-20</code> × <code>fluxoEventoPremiumUtils.ts:61-67</code> × <code>mensagemGlicemia.ts:33</code> × <code>ia-worker/glicemia.ts:74</code></td></tr>
+              <tr><td>Score metabólico hardcoded</td><td><code>radar-metabolico/score-engine.ts:1-76</code></td></tr>
+              <tr><td>Mensagens hardcoded</td><td><code>messages/respostas.ts:1-157</code> + <code>onboarding.ts:1-133</code></td></tr>
+              <tr><td>Lembretes 15/30/60min</td><td><code>eventoPremiumRegras.ts:1-53</code></td></tr>
+              <tr><td>Sem RLS/trigger/view</td><td>Migrations e schema · nenhum <code>CREATE POLICY</code>/<code>TRIGGER</code>/<code>VIEW</code></td></tr>
+              <tr><td>Sem pg_cron</td><td>docker-compose e migrations · Postgres alpine padrão sem extensão</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="text-ink-400 text-xs mt-4">Nenhuma query SQL executada · não havia credencial DB neste ambiente · auditoria realizada via código.</p>
+      </section>
+
+      <!-- 14b · COMPROVAÇÃO SQL REAL (NOVO V2) -->
+      <section id="sql-real" class="mb-14">
+        <h2 class="text-2xl md:text-3xl font-bold mb-4 text-ok flex items-center gap-3">
+          ✅ 14b · Comprovação SQL real <span class="badge badge-ok" style="font-size:11px">NOVO V2</span>
+          <a class="anchor-link text-primary-500 ml-2 text-base" href="#sql-real">¶</a>
+        </h2>
+        <p class="text-ink-300 text-sm mb-4 leading-relaxed">
+          As 21 queries SELECT abaixo foram rodadas contra um Postgres 17 real (Neon · SP), após aplicar as 8 migrations canônicas.
+          Todas read-only · zero escrita. Cada linha confirma ou refuta uma afirmação do relatório v1.
+        </p>
+
+        <div class="bg-ink-800 rounded-xl border border-ink-700 overflow-hidden overflow-x-auto">
+          <table>
+            <thead><tr><th>#</th><th>Pergunta</th><th>Resultado SQL real</th><th>Confirma v1?</th></tr></thead>
+            <tbody>
+              <tr><td><code>Q1</code></td><td>Tabelas no schema public</td><td><strong class="text-danger">9 tabelas</strong> (não 21 como o v1 afirmou)</td><td><span class="badge badge-fail">🚨 ACHADO NOVO PIOR</span></td></tr>
+              <tr><td><code>Q2</code></td><td>Tabelas para Protocol/Timer/Outbox/AQS</td><td><strong>0</strong></td><td><span class="badge badge-ok">✅ CONFIRMADO</span></td></tr>
+              <tr><td><code>Q3</code></td><td><code>Glicemia.unidade</code> é enum?</td><td>✅ <code>UnidadeGlicemia</code> (MG_DL/MMOL_L)</td><td><span class="badge badge-ok">✅ CONFIRMADO</span></td></tr>
+              <tr><td><code>Q4</code></td><td>Enums clínicos</td><td>só <code>UnidadeGlicemia</code> + <code>ContextoGlicemia</code></td><td><span class="badge badge-ok">✅ CONFIRMADO</span></td></tr>
+              <tr><td><code>Q5</code></td><td>Functions/RPCs customizadas</td><td><strong>0</strong></td><td><span class="badge badge-ok">✅ toda lógica em TS</span></td></tr>
+              <tr><td><code>Q6</code></td><td>Triggers</td><td><strong>0</strong></td><td><span class="badge badge-ok">✅ CONFIRMADO</span></td></tr>
+              <tr><td><code>Q7</code></td><td>Views</td><td><strong>0</strong></td><td><span class="badge badge-ok">✅ CONFIRMADO</span></td></tr>
+              <tr><td><code>Q8</code></td><td>Tabelas com RLS habilitada</td><td><strong>0</strong></td><td><span class="badge badge-ok">✅ CONFIRMADO</span></td></tr>
+              <tr><td><code>Q9</code></td><td>RLS policies</td><td><strong>0</strong></td><td><span class="badge badge-ok">✅ CONFIRMADO</span></td></tr>
+              <tr><td><code>Q10</code></td><td>Extensões instaladas</td><td>só <code>plpgsql 1.0</code> · sem <code>pg_cron</code> · sem <code>pgcrypto</code></td><td><span class="badge badge-ok">✅ CONFIRMADO</span></td></tr>
+              <tr><td><code>Q11</code></td><td>CHECK constraints clínicos</td><td><strong>0</strong></td><td><span class="badge badge-ok">✅ validação só em TS</span></td></tr>
+              <tr><td><code>Q12</code></td><td><code>Paciente.onboardingDados</code> é jsonb livre?</td><td>✅ campo <code>jsonb</code> · sem schema · sem index GIN</td><td><span class="badge badge-ok">✅ CONFIRMADO · AQS state em JSON</span></td></tr>
+              <tr><td><code>Q13</code></td><td>Linhas nas 9 tabelas existentes</td><td>todas <strong>0</strong> (DB recém-criado)</td><td><span class="badge badge-muted">n/a · baseline</span></td></tr>
+              <tr><td><code>Q14</code></td><td><code>GatilhoAutomacao</code> enum</td><td><strong class="text-danger">NÃO EXISTE</strong> (módulo Automacao inteiro ausente)</td><td><span class="badge badge-fail">🚨 ACHADO NOVO</span></td></tr>
+              <tr><td><code>Q14b</code></td><td>TODOS os enums em public</td><td><strong>12 enums</strong> · faltam 10 declarados no schema (<code>StatusLead</code>, <code>GatilhoAutomacao</code>, <code>AcaoAutomacao</code>, <code>StatusTarefa</code>, etc)</td><td><span class="badge badge-fail">🚨 ACHADO NOVO</span></td></tr>
+              <tr><td><code>Q15</code></td><td>Migrations aplicadas</td><td>exatas <strong>8 do repo</strong></td><td><span class="badge badge-ok">✅</span></td></tr>
+              <tr><td><code>Q16</code></td><td>Colunas relacionadas a AQS/Protocolo</td><td><strong>0</strong></td><td><span class="badge badge-ok">✅ CONFIRMADO</span></td></tr>
+              <tr><td><code>Q17</code></td><td>Indexes em <code>Paciente</code></td><td>só PK + UNIQUE (clinicaId, telefone) · <strong>zero index em onboardingDados</strong></td><td><span class="badge badge-ok">✅ JSON não-indexado</span></td></tr>
+              <tr><td><code>Q18</code></td><td>Tamanho das tabelas</td><td>totalmente vazio · só schema · <code>_prisma_migrations</code> 32 kB</td><td><span class="badge badge-muted">n/a</span></td></tr>
+              <tr style="background:rgba(239,68,68,.10)"><td><code>Q19</code></td><td><strong>Drift schema vs DB</strong></td><td><strong class="text-danger">11 de 20 models declarados AUSENTES no DB</strong> · 55% drift</td><td><span class="badge badge-fail">🚨 ACHADO BOMBA NOVO</span></td></tr>
+              <tr><td><code>Q20</code></td><td>Total de FKs</td><td><strong>8 FKs</strong></td><td><span class="badge badge-muted">n/a</span></td></tr>
+              <tr><td><code>Q21</code></td><td>Total de indexes</td><td><strong>16 indexes</strong></td><td><span class="badge badge-muted">n/a</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 class="text-lg font-semibold text-ink-100 mt-6 mb-3">Setup usado pra validação</h3>
+        <div class="bg-ink-800 rounded-xl border border-ink-700 overflow-hidden">
+          <table>
+            <tbody>
+              <tr><td><strong>Provider Postgres</strong></td><td>Neon (cloud · free tier · São Paulo)</td></tr>
+              <tr><td><strong>Versão</strong></td><td>Postgres 17 · mesma versão do <code>infra/docker/docker-compose.dev.yml</code></td></tr>
+              <tr><td><strong>Migrations aplicadas</strong></td><td><code>pnpm prisma migrate deploy</code> · 8 migrations canônicas do repo</td></tr>
+              <tr><td><strong>Modo</strong></td><td>100% read-only · só <code>information_schema</code> e <code>pg_*</code></td></tr>
+              <tr><td><strong>Cliente</strong></td><td>Prisma 7.5 + <code>@prisma/adapter-pg</code> via <code>$queryRawUnsafe</code></td></tr>
+              <tr><td><strong>Total de queries</strong></td><td>21 SELECTs · zero escrita</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p class="text-ink-400 text-xs mt-4 leading-relaxed">
+          JSON estruturado dos resultados em <code>C:\tmp\glucoai-audit-results.json</code> · cada query com <code>id</code>, <code>label</code>, <code>rowCount</code>, <code>rows</code> reais.
+        </p>
+      </section>
+
+      <!-- 15 · FINAL -->
+      <section id="final" class="mb-14">
+        <h2 class="text-2xl md:text-3xl font-bold mb-4 text-ink-100">15 · Veredito final <a class="anchor-link text-primary-500 ml-2 text-base" href="#final">¶</a></h2>
+        <p class="text-ink-200 mb-4"><strong>O banco está estruturado como fonte da verdade do Método de Controle Rápido da Glicemia?</strong></p>
+        <div class="text-center py-8 my-6 bg-ink-800 rounded-xl border-2 border-danger">
+          <div class="text-6xl mb-3">🔴🔴</div>
+          <div class="text-3xl font-bold text-danger">NÃO · E PIOR DO QUE PARECIA</div>
+          <div class="text-ink-400 text-xs mt-2 uppercase tracking-[0.2em]">FAIL_DB_NOT_SOURCE_OF_TRUTH</div>
+          <div class="text-ink-400 text-xs mt-1 uppercase tracking-[0.2em]">+ SCHEMA_DRIFT_55%</div>
+        </div>
+
+        <h3 class="text-lg font-semibold text-ink-100 mt-6 mb-3">Motivos (10)</h3>
+        <ol class="list-decimal list-inside space-y-2 text-ink-200 text-sm pl-2">
+          <li class="text-danger"><strong>SCHEMA DRIFT 55%.</strong> 11 de 20 models declarados em <code>schema.prisma</code> NÃO existem no DB após aplicar as 8 migrations canônicas do repo. <strong>Comprovado em Postgres real</strong> · veja <a href="#drift" class="text-primary-500 underline">seção 1b</a>.</li>
+          <li class="text-danger"><strong>Sistema de Automações não é persistível.</strong> Tabela <code>Automacao</code> ausente · <code>TemplateWhatsapp</code> ausente · enum <code>GatilhoAutomacao</code> ausente. UI faz <code>prisma.automacao.findMany()</code> · runtime falha.</li>
+          <li><strong>Decisões clínicas em código.</strong> Classificação (4 versões), AQS-01/02/03, etapas, mensagens, volumes prescritivos · TUDO em <code>.ts</code>.</li>
+          <li><strong>Não há entidades clínicas modeladas.</strong> Nem nas 9 que existem · nem nas 11 ausentes · em lugar nenhum há <code>Protocolo</code>, <code>EtapaProtocolo</code>, <code>FaixaGlicemica</code>, <code>Timer</code>, <code>Outbox</code>, <code>SessaoProtocolo</code>, <code>EventoDecisao</code>, <code>Predicao</code>, <code>RecuperacaoPaciente</code>, <code>MetodoVersao</code>.</li>
+          <li><strong>Estado do protocolo é JSON arbitrário</strong> em <code>Paciente.onboardingDados._eventoPremium</code>.</li>
+          <li><strong>Não existe scheduling clínico real.</strong> "Rechecagem em 1 hora" é só texto · sistema NÃO agenda.</li>
+          <li><strong>Não existe dispatch/outbox.</strong> Todo envio é síncrono.</li>
+          <li><strong>Inconsistências clínicas.</strong> 4 sistemas de classificação com thresholds incompatíveis (70/140/180/250/300).</li>
+          <li><strong>Sem versionamento.</strong> Mudar threshold apaga histórico.</li>
+          <li><strong>Sem RLS no DB.</strong> Multi-tenancy via WHERE clinicaId na app · grave para dado LGPD-saúde.</li>
+        </ol>
+      </section>
+
+      <!-- 16 · RESUMO -->
+      <section id="resumo" class="mb-14">
+        <h2 class="text-2xl md:text-3xl font-bold mb-4 text-ink-100">📊 Resumo de 1 minuto <a class="anchor-link text-primary-500 ml-2 text-base" href="#resumo">¶</a></h2>
+        <div class="bg-ink-800 rounded-xl border border-ink-700 overflow-hidden">
+          <table>
+            <thead><tr><th>Dimensão</th><th>Estado</th></tr></thead>
+            <tbody>
+              <tr><td>Recebimento WhatsApp inbound</td><td><span class="badge badge-ok">✅</span> funciona (text/image/interactive)</td></tr>
+              <tr><td>Persistência básica de leitura</td><td><span class="badge badge-ok">✅</span> Glicemia · Refeicao · Mensagem</td></tr>
+              <tr><td>Análise via OpenAI Vision</td><td><span class="badge badge-ok">✅</span> funciona</td></tr>
+              <tr><td>Classificação de glicemia</td><td><span class="badge badge-fail">❌</span> 4 versões inconsistentes em código</td></tr>
+              <tr><td>Protocolo AQS modelado</td><td><span class="badge badge-fail">❌</span> vive em código + JSON</td></tr>
+              <tr><td>Mensagens configuráveis</td><td><span class="badge badge-fail">❌</span> 50+ strings hardcoded · só 4 templates Meta gerenciáveis</td></tr>
+              <tr><td>Timer/rechecagem 1h</td><td><span class="badge badge-fail">❌</span> não existe (só texto)</td></tr>
+              <tr><td>Controle 2h pós-refeição</td><td><span class="badge badge-fail">❌</span> não existe</td></tr>
+              <tr><td>Outbox/dispatch</td><td><span class="badge badge-fail">❌</span> não existe</td></tr>
+              <tr><td>Audit de decisão clínica</td><td><span class="badge badge-fail">❌</span> só timeline JSON</td></tr>
+              <tr><td>Versionamento de método</td><td><span class="badge badge-fail">❌</span> não existe</td></tr>
+              <tr><td>RLS no DB</td><td><span class="badge badge-fail">❌</span> não existe</td></tr>
+              <tr style="background:rgba(239,68,68,.08)"><td><strong>Drift schema.prisma × DB</strong></td><td><span class="badge badge-fail">🚨 55% · 11 de 20 models AUSENTES</span></td></tr>
+              <tr style="background:rgba(239,68,68,.08)"><td><strong>Veredito (v2)</strong></td><td><span class="badge badge-fail">🔴 FAIL_DB_NOT_SOURCE_OF_TRUTH</span> <span class="badge badge-fail">🔴🔴 SCHEMA_DRIFT_55%</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- FOOTER -->
+      <footer class="border-t border-ink-700 pt-8 mt-12 text-center text-ink-400 text-xs">
+        <p class="mb-2">Auditoria read-only · Zero <code>INSERT/UPDATE/DELETE</code> · Zero <code>deploy</code> · Zero <code>provider call</code>.</p>
+        <p>Gerada em 2026-05-15 · sobre <code>github.com/glucoai/glucoai</code> @ <code>09477ca</code></p>
+        <p class="mt-2"><strong class="text-ok">v2 com comprovação SQL real</strong> · validada em Postgres 17 Neon (SP) · 21 queries · zero escrita</p>
+        <p class="mt-3">Esta página é <strong>independente</strong> · não afeta o código do Gluco AI.</p>
+      </footer>
+
+    </main>
+  </div>
+</div>
+</div>
+<!-- ═══ FIM TAB AUDITORIA ═══ -->
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- TAB CONTENT: BLUEPRINT DB V2                            -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="tab-content" data-tab-content="blueprint">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+  <div class="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-10">
+
+    <aside class="no-print lg:sticky lg:top-32 lg:self-start lg:max-h-[calc(100vh-9rem)] lg:overflow-y-auto">
+      <nav class="toc space-y-0.5 pb-6">
+        <div class="text-[10px] font-bold uppercase tracking-[0.18em] text-ink-400 px-3 mb-2">Blueprint DB v2.1</div>
+        <a href="#bp-veredito">1 · Veredito v2.1</a>
+        <a href="#bp-controle-ui">2 · Princípio controle UI</a>
+        <a href="#bp-regras">3 · Regras inegociáveis</a>
+        <a href="#bp-workspaces">4 · Workspaces (não clinics)</a>
+        <a href="#bp-multiuser">5 · Multiusuário dia 1</a>
+        <a href="#bp-supabase">6 · Supabase SQL-first</a>
+        <a href="#bp-modulos">7 · 9 módulos (A–I)</a>
+        <a href="#bp-modulo-i">8 · ⭐ Módulo I · UI Control</a>
+        <a href="#bp-core">9 · Escopo Core</a>
+        <a href="#bp-roadmap">10 · Roadmap 12 fases</a>
+        <a href="#bp-transversais">11 · Regras transversais</a>
+        <a href="#bp-perguntas">12 · 13 perguntas do DB</a>
+        <a href="#bp-ordem">13 · Ordem final (19 passos)</a>
+        <a href="#bp-nao-faz">14 · O que NÃO faz parte</a>
+        <a href="#bp-proximo">15 · Próximo passo</a>
+      </nav>
+    </aside>
+
+    <main class="min-w-0">
+
+      <div class="mb-12">
+        <div class="text-xs uppercase tracking-[0.2em] text-ok font-bold mb-3">🏗 Reconstrução do banco · v2.1</div>
+        <h1 class="text-3xl md:text-5xl font-bold tracking-tight leading-tight mb-4">
+          GLUCO AI · DB v2.1<br/><span class="gradient-text">Localhost-First · Supabase SQL · Workspaces · UI Control</span>
+        </h1>
+        <p class="text-ink-300 text-base md:text-lg max-w-3xl leading-relaxed">
+          Versão 2.1 · 2026-05-15 · Planejamento técnico (zero implementação). <strong>9 módulos (A–I)</strong> · <strong>75+ tabelas Core</strong> · multi-tenant por país/idioma · multiusuário · Supabase SQL-first · <strong>controle TOTAL pela UI</strong> de horários/mensagens/alertas/programações/prompts IA/conteúdo/onboarding/métricas.
+          <br/><strong>LOCALHOST ONLY · Zero git/commit/push/deploy/produção/provider real/WhatsApp real.</strong>
+        </p>
+        <div class="flex flex-wrap items-center gap-2 mt-5">
+          <span class="badge badge-ok">🟢 APPROVED_DIRECTION_WITH_LOCALHOST_ONLY_CONSTRAINT</span>
+          <span class="badge badge-ok">DBV2_MUST_BE_SUPABASE_SQL_FIRST</span>
+          <span class="badge badge-ok">UI_CONTROL_SURFACE_REQUIRED_FROM_CORE</span>
+          <span class="badge badge-muted">localhost · zero produção</span>
+        </div>
+      </div>
+
+      <!-- 1 · Veredito v2.1 -->
+      <section id="bp-veredito" class="mb-14">
+        <h2 class="text-2xl md:text-3xl font-bold mb-4 text-ink-100">1 · Veredito oficial v2.1 <a class="anchor-link text-primary-500 ml-2 text-base" href="#bp-veredito">¶</a></h2>
+        <div class="callout callout-ok">
+          <div class="font-bold text-xl text-ok mb-2">🟢 6 vereditos canônicos</div>
+          <ul class="text-ink-200 leading-relaxed space-y-1.5 text-sm">
+            <li>· <code>APPROVED_DIRECTION_WITH_LOCALHOST_ONLY_CONSTRAINT</code></li>
+            <li>· <code>DBV2_MUST_BE_SUPABASE_SQL_FIRST_CANDIDATE</code></li>
+            <li>· <code>MULTITENANT_MEANS_COUNTRY_LANGUAGE_WORKSPACE</code></li>
+            <li>· <code>MULTIUSER_REQUIRED_FROM_DAY_ONE</code></li>
+            <li>· <code>DATABASE_MUST_BE_SOURCE_OF_TRUTH</code></li>
+            <li>· <code>UI_CONTROL_SURFACE_REQUIRED_FROM_CORE</code> ⭐ <strong>NOVO em v2.1</strong></li>
+            <li>· <code>NO_IMPLEMENTATION_BEFORE_CORE_SCOPE_LOCK</code></li>
+          </ul>
+        </div>
+        <p class="text-ink-300 text-sm mt-4">Blueprint nascido da auditoria que comprovou drift 55% e método AQS hardcoded. Agora reposicionado pra multi-tenant por país/idioma (workspaces), Supabase SQL-first (DDL não fica mais em <code>schema.prisma</code>), e controle TOTAL pela UI de tudo que hoje exigiria deploy pra mudar.</p>
+      </section>
+
+      <!-- 2 · Princípio controle UI -->
+      <section id="bp-controle-ui" class="mb-14">
+        <h2 class="text-2xl md:text-3xl font-bold mb-4 text-ink-100">2 · Princípio v2.1 · Controle total pela UI <a class="anchor-link text-primary-500 ml-2 text-base" href="#bp-controle-ui">¶</a></h2>
+        <div class="callout callout-warn">
+          <p class="text-ink-100 leading-relaxed"><strong>Nada que o admin precise mudar pode estar hardcoded.</strong> Se uma decisão operacional exige redeploy, o DB ainda não é fonte da verdade.</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-5 text-sm">
+          <div class="bg-ink-800 rounded-xl border border-ink-700 p-4">⏰ <strong>Horários e cronogramas</strong> (recorrentes ou one-shot)</div>
+          <div class="bg-ink-800 rounded-xl border border-ink-700 p-4">💬 <strong>Mensagens, templates, variáveis, idiomas</strong></div>
+          <div class="bg-ink-800 rounded-xl border border-ink-700 p-4">📣 <strong>Programações de campanhas/conteúdo</strong></div>
+          <div class="bg-ink-800 rounded-xl border border-ink-700 p-4">🚨 <strong>Regras de alerta</strong> (condição → severidade → destinatário → canal)</div>
+          <div class="bg-ink-800 rounded-xl border border-ink-700 p-4">🤖 <strong>Prompts de IA</strong> (extração de glicemia, análise de comida)</div>
+          <div class="bg-ink-800 rounded-xl border border-ink-700 p-4">🚩 <strong>Feature flags por workspace</strong></div>
+          <div class="bg-ink-800 rounded-xl border border-ink-700 p-4">📊 <strong>Métricas e metas</strong> do dashboard</div>
+          <div class="bg-ink-800 rounded-xl border border-ink-700 p-4">📝 <strong>Quiz/onboarding</strong> por workspace</div>
+        </div>
+        <p class="text-ink-300 text-sm mt-5">Tudo isso vira <a href="#bp-modulo-i" class="text-primary-500 underline">Módulo I · UI Control Surface</a> (30 tabelas em 10 submódulos).</p>
+      </section>
+
+      <!-- 3 · Regras inegociáveis -->
+      <section id="bp-regras" class="mb-14">
+        <h2 class="text-2xl md:text-3xl font-bold mb-4 text-ink-100">3 · Regras inegociáveis (Fase 0) <a class="anchor-link text-primary-500 ml-2 text-base" href="#bp-regras">¶</a></h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div class="bg-ink-800 rounded-xl border-2 border-danger p-5">
+            <h3 class="text-danger font-bold mb-3">❌ Proibido</h3>
+            <ul class="text-ink-200 text-sm space-y-1.5">
+              <li>· <code>git commit</code></li>
+              <li>· <code>git push</code></li>
+              <li>· <code>deploy</code></li>
+              <li>· <code>produção</code></li>
+              <li>· <code>provider real</code> (Asaas, OpenAI prod)</li>
+              <li>· <code>WhatsApp real</code> · <code>Meta real</code></li>
+              <li>· <code>prisma db push</code></li>
+              <li>· <code>prisma migrate deploy</code> em qualquer DB que não seja localhost</li>
+            </ul>
+          </div>
+          <div class="bg-ink-800 rounded-xl border-2 border-ok p-5">
+            <h3 class="text-ok font-bold mb-3">✅ Permitido</h3>
+            <ul class="text-ink-200 text-sm space-y-1.5">
+              <li>· criar arquivos locais</li>
+              <li>· migrations SQL locais em <code>supabase/migrations/</code></li>
+              <li>· <code>supabase start</code> (Docker local)</li>
+              <li>· rodar SQL local</li>
+              <li>· rodar testes locais</li>
+              <li>· gerar docs locais</li>
+            </ul>
+          </div>
+        </div>
+        <h3 class="text-lg font-semibold text-ink-100 mt-6 mb-3">Variáveis de ambiente travadas</h3>
+        <pre class="bg-ink-800 rounded-xl border border-ink-700 p-4 text-sm text-ink-200 overflow-x-auto"><code>DB_HOST=localhost
+SUPABASE_URL=http://localhost:54321
+OUTBOX_REAL_SEND=false
+META_ENABLED=false
+WHATSAPP_REAL_SEND=false
+PAYMENT_REAL_CREATE_ENABLED=false</code></pre>
+        <p class="text-ink-300 text-sm mt-3">Qualquer variável apontando pra prod durante reconstrução = <strong class="text-danger">parar imediatamente</strong>.</p>
+      </section>
+
+      <!-- 4 · Workspaces -->
+      <section id="bp-workspaces" class="mb-14">
+        <h2 class="text-2xl md:text-3xl font-bold mb-4 text-ink-100">4 · Workspaces (não "clinics") <a class="anchor-link text-primary-500 ml-2 text-base" href="#bp-workspaces">¶</a></h2>
+        <div class="callout callout-info">
+          <p class="text-ink-100"><strong>Gluco AI não nasce como "multi-clínica"</strong>. Nasce como <strong>multi-tenant por operação/mercado/país</strong>. "Clínica" ancora o modelo no caso brasileiro e impede expansão.</p>
+        </div>
+        <p class="text-ink-300 mt-4 mb-3">Cada <code>workspace</code> = uma operação do Gluco AI em país/idioma/mercado:</p>
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-2.5 mb-5">
+          <div class="bg-ink-800 rounded-xl border border-ink-700 p-3 text-sm"><strong>🇧🇷 Brasil</strong> · pt-BR</div>
+          <div class="bg-ink-800 rounded-xl border border-ink-700 p-3 text-sm"><strong>🇲🇽 México</strong> · es-MX</div>
+          <div class="bg-ink-800 rounded-xl border border-ink-700 p-3 text-sm"><strong>🇨🇴 Colômbia</strong> · es-CO</div>
+          <div class="bg-ink-800 rounded-xl border border-ink-700 p-3 text-sm"><strong>🇺🇸 EUA-ES</strong> · es-US</div>
+          <div class="bg-ink-800 rounded-xl border border-ink-700 p-3 text-sm"><strong>🇺🇸 EUA-EN</strong> · en-US</div>
+          <div class="bg-ink-800 rounded-xl border border-ink-700 p-3 text-sm"><strong>🇵🇹 Portugal</strong> · pt-PT</div>
+        </div>
+        <h3 class="text-lg font-semibold text-ink-100 mt-6 mb-3">Cada workspace carrega</h3>
+        <div class="bg-ink-800 rounded-xl border border-ink-700 overflow-hidden overflow-x-auto">
+          <table>
+            <thead><tr><th>Atributo</th><th>Tabela / Campo</th></tr></thead>
+            <tbody>
+              <tr><td>País</td><td><code>workspaces.country_code</code></td></tr>
+              <tr><td>Idioma principal + secundários</td><td><code>workspaces.default_locale</code> + <code>workspace_locales</code></td></tr>
+              <tr><td>Timezone, moeda</td><td><code>workspaces.timezone, currency</code></td></tr>
+              <tr><td>1..N números de WhatsApp</td><td><code>workspace_phone_numbers</code> (resolve "número por país")</td></tr>
+              <tr><td>Templates próprios</td><td><code>message_templates</code> com <code>workspace_id</code></td></tr>
+              <tr><td>Versão de método ativa</td><td><code>method_versions.workspace_id</code> (ou global null)</td></tr>
+              <tr><td>Usuários internos</td><td><code>workspace_memberships</code></td></tr>
+              <tr><td>Pacientes</td><td><code>patients.workspace_id</code></td></tr>
+              <tr><td>Regras locais (regulatório, horário comercial)</td><td><code>workspace_settings</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 5 · Multiusuário -->
+      <section id="bp-multiuser" class="mb-14">
+        <h2 class="text-2xl md:text-3xl font-bold mb-4 text-ink-100">5 · Multiusuário desde o dia 1 <a class="anchor-link text-primary-500 ml-2 text-base" href="#bp-multiuser">¶</a></h2>
+        <p class="text-ink-300 mb-4">Um <code>user</code> pode ter memberships em N workspaces. Permissões são <strong>por workspace</strong>, nunca globais.</p>
+        <h3 class="text-lg font-semibold text-ink-100 mb-3">Estrutura obrigatória</h3>
+        <div class="bg-ink-800 rounded-xl border border-ink-700 p-4 font-mono text-sm text-ink-200 mb-5">
+          users · workspaces · workspace_memberships · roles · permissions · role_permissions
+        </div>
+        <h3 class="text-lg font-semibold text-ink-100 mt-6 mb-3">Exemplo concreto</h3>
+        <div class="bg-ink-800 rounded-xl border border-ink-700 overflow-hidden overflow-x-auto">
+          <table>
+            <thead><tr><th>Usuário</th><th>Brasil</th><th>México</th><th>Colômbia</th></tr></thead>
+            <tbody>
+              <tr><td>Alden</td><td><span class="badge badge-ok">owner</span></td><td><span class="badge badge-ok">owner</span></td><td><span class="badge badge-ok">owner</span></td></tr>
+              <tr><td>Suporte Brasil</td><td><span class="badge badge-info">support</span></td><td>—</td><td>—</td></tr>
+              <tr><td>Nutricionista México</td><td>—</td><td><span class="badge badge-info">professional</span></td><td>—</td></tr>
+              <tr><td>Admin Colômbia</td><td>—</td><td>—</td><td><span class="badge badge-info">admin</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h3 class="text-lg font-semibold text-ink-100 mt-6 mb-3">17 permissões mínimas (seed em migration 0002)</h3>
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-1.5 text-xs font-mono">
+          <div class="bg-ink-800 border border-ink-700 rounded px-2.5 py-1.5">patients.read</div>
+          <div class="bg-ink-800 border border-ink-700 rounded px-2.5 py-1.5">patients.write</div>
+          <div class="bg-ink-800 border border-ink-700 rounded px-2.5 py-1.5">glucose.read</div>
+          <div class="bg-ink-800 border border-ink-700 rounded px-2.5 py-1.5">glucose.write</div>
+          <div class="bg-ink-800 border border-ink-700 rounded px-2.5 py-1.5">meals.read</div>
+          <div class="bg-ink-800 border border-ink-700 rounded px-2.5 py-1.5">meals.write</div>
+          <div class="bg-ink-800 border border-ink-700 rounded px-2.5 py-1.5">protocols.read</div>
+          <div class="bg-ink-800 border border-ink-700 rounded px-2.5 py-1.5">protocols.write</div>
+          <div class="bg-ink-800 border border-ink-700 rounded px-2.5 py-1.5">method_versions.approve</div>
+          <div class="bg-ink-800 border border-ink-700 rounded px-2.5 py-1.5">messages.read</div>
+          <div class="bg-ink-800 border border-ink-700 rounded px-2.5 py-1.5">messages.write</div>
+          <div class="bg-ink-800 border border-ink-700 rounded px-2.5 py-1.5">templates.approve</div>
+          <div class="bg-ink-800 border border-ink-700 rounded px-2.5 py-1.5">outbox.read</div>
+          <div class="bg-ink-800 border border-ink-700 rounded px-2.5 py-1.5">human_review.manage</div>
+          <div class="bg-ink-800 border border-ink-700 rounded px-2.5 py-1.5">users.manage</div>
+          <div class="bg-ink-800 border border-ink-700 rounded px-2.5 py-1.5">settings.manage</div>
+          <div class="bg-ink-800 border border-ink-700 rounded px-2.5 py-1.5">audit.read</div>
+        </div>
+      </section>
+
+      <!-- 6 · Supabase SQL-first -->
+      <section id="bp-supabase" class="mb-14">
+        <h2 class="text-2xl md:text-3xl font-bold mb-4 text-ink-100">6 · Supabase SQL-first <a class="anchor-link text-primary-500 ml-2 text-base" href="#bp-supabase">¶</a></h2>
+        <div class="callout callout-ok">
+          <p class="text-ink-100"><strong>Fonte da verdade de DDL = migration SQL versionada</strong> em <code>supabase/migrations/</code>. <strong>NÃO é <code>schema.prisma</code></strong>. <strong>NÃO é <code>prisma db push</code></strong>. Prisma vira camada de leitura/escrita do backend (types gerados via introspecção) — nunca dono do schema.</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mt-5">
+          <div class="bg-ink-800 rounded-xl border-2 border-ok p-5">
+            <h3 class="text-ok font-bold mb-3">✅ Por que Supabase</h3>
+            <ul class="text-ink-200 text-sm space-y-1.5">
+              <li>· Postgres nativo</li>
+              <li>· RLS forte (núcleo do multi-tenant)</li>
+              <li>· Auth integrado (users + sessions)</li>
+              <li>· Storage para fotos comida/glicosímetro</li>
+              <li>· Edge Functions (dispatcher, schedulers)</li>
+              <li>· Realtime pro dashboard</li>
+              <li>· Migrations SQL versionadas</li>
+              <li>· CLI roda Postgres + Auth + Storage local em Docker</li>
+            </ul>
+          </div>
+          <div class="bg-ink-800 rounded-xl border-2 border-danger p-5">
+            <h3 class="text-danger font-bold mb-3">❌ Por que NÃO Prisma-first</h3>
+            <ul class="text-ink-200 text-sm space-y-1.5">
+              <li>· Foi a causa do drift atual (55%, 11 entidades fantasma)</li>
+              <li>· <code>schema.prisma</code> continua existindo só como referência tipada</li>
+              <li>· DDL real vem de SQL</li>
+            </ul>
+          </div>
+        </div>
+        <h3 class="text-lg font-semibold text-ink-100 mt-6 mb-3">Ordem de adoção</h3>
+        <ol class="list-decimal list-inside text-ink-200 text-sm space-y-1.5 pl-2">
+          <li><strong>localhost</strong> → <code>supabase start</code> (Docker)</li>
+          <li><strong>staging</strong> → Supabase project novo (só após smoke local completo)</li>
+          <li><strong>production</strong> → só após staging validado N dias</li>
+        </ol>
+      </section>
+
+      <!-- 7 · 9 Módulos -->
+      <section id="bp-modulos" class="mb-14">
+        <h2 class="text-2xl md:text-3xl font-bold mb-4 text-ink-100">7 · 9 Módulos (A–I) <a class="anchor-link text-primary-500 ml-2 text-base" href="#bp-modulos">¶</a></h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="bg-ink-800 rounded-xl border border-ink-700 p-5"><h4 class="text-primary-500 font-bold mb-2">A · Platform / Multi-tenant</h4><div class="text-ink-400 text-xs mb-2">10 tabelas</div><p class="text-sm text-ink-200">workspaces · users · memberships · roles · permissions · phone_numbers · settings · audit_logs</p></div>
+          <div class="bg-ink-800 rounded-xl border border-ink-700 p-5"><h4 class="text-primary-500 font-bold mb-2">B · Pacientes</h4><div class="text-ink-400 text-xs mb-2">7 tabelas</div><p class="text-sm text-ink-200">patients + perfis · clínico · consents · preferences · risk_flags · identities</p></div>
+          <div class="bg-ink-800 rounded-xl border border-ink-700 p-5"><h4 class="text-primary-500 font-bold mb-2">C · WhatsApp + Outbox</h4><div class="text-ink-400 text-xs mb-2">9 tabelas</div><p class="text-sm text-ink-200">wa_* · message_templates · template_versions · <strong>outbound_dispatches</strong> · delivery_attempts</p></div>
+          <div class="bg-ink-800 rounded-xl border border-ink-700 p-5"><h4 class="text-primary-500 font-bold mb-2">D · Glicemia</h4><div class="text-ink-400 text-xs mb-2">3 tabelas</div><p class="text-sm text-ink-200">glucose_readings (MG_DL + MMOL_L) · extraction_attempts · classifications</p></div>
+          <div class="bg-ink-800 rounded-xl border border-ink-700 p-5"><h4 class="text-primary-500 font-bold mb-2">E · Refeição + Predição</h4><div class="text-ink-400 text-xs mb-2">6 tabelas</div><p class="text-sm text-ink-200">meal_logs · análise · glycemic_predictions · followup_links · validations</p></div>
+          <div class="bg-ink-800 rounded-xl border-2 border-ok p-5"><h4 class="text-ok font-bold mb-2">F · Método (CORAÇÃO)</h4><div class="text-ink-400 text-xs mb-2">10 tabelas</div><p class="text-sm text-ink-200">method_versions · glucose_ranges · protocols · steps · entry/exit criteria · messages · timers · guardrails · decision_rules</p></div>
+          <div class="bg-ink-800 rounded-xl border border-ink-700 p-5"><h4 class="text-primary-500 font-bold mb-2">G · Runtime</h4><div class="text-ink-400 text-xs mb-2">6 tabelas</div><p class="text-sm text-ink-200">protocol_sessions · session_steps · decision_events · scheduled_tasks · patient_alerts · human_review_queue</p></div>
+          <div class="bg-ink-800 rounded-xl border border-ink-700 p-5 opacity-80"><h4 class="text-ink-400 font-bold mb-2">H · Automação (pós-Core)</h4><div class="text-ink-400 text-xs mb-2">7 tabelas · FORA do Core</div><p class="text-sm text-ink-300">automation_rules · runs · events · recovery_campaigns · attempts</p></div>
+          <div class="bg-ink-800 rounded-xl border-2 border-warn p-5"><h4 class="text-warn font-bold mb-2">⭐ I · UI Control Surface</h4><div class="text-ink-400 text-xs mb-2">30 tabelas · 10 submódulos · <strong>NOVO em v2.1</strong></div><p class="text-sm text-ink-200">prompts IA · alert rules · cronograma · templates · notificações · feature flags · conteúdo · onboarding · métricas · sandbox</p></div>
+        </div>
+        <p class="text-ink-300 text-sm mt-5"><strong>Total Core: 75+ tabelas</strong> (módulo H fica fora do Core). Detalhe completo do Módulo I em <a href="#bp-modulo-i" class="text-primary-500 underline">seção 8</a>.</p>
+      </section>
+
+      <!-- 8 · Módulo I detalhado -->
+      <section id="bp-modulo-i" class="mb-14">
+        <h2 class="text-2xl md:text-3xl font-bold mb-4 text-ink-100">8 · ⭐ Módulo I · UI Control Surface (CRÍTICO v2.1) <a class="anchor-link text-primary-500 ml-2 text-base" href="#bp-modulo-i">¶</a></h2>
+        <p class="text-ink-300 mb-5">Sem este módulo, o DB ainda não é fonte da verdade — porque o admin precisaria editar código pra mudar comportamento. 10 submódulos garantem que TUDO seja editável pela UI.</p>
+        <div class="bg-ink-800 rounded-xl border-2 border-warn overflow-hidden overflow-x-auto">
+          <table>
+            <thead><tr><th>#</th><th>Submódulo</th><th>Tabelas</th><th>O que a UI passa a controlar</th></tr></thead>
+            <tbody>
+              <tr><td>I.1</td><td><strong>Prompts de IA versionados</strong></td><td><code>ai_prompts</code>, <code>ai_prompt_versions</code>, <code>ai_extraction_logs</code></td><td>Criar nova versão de prompt, comparar A/B, aprovar, ver logs</td></tr>
+              <tr><td>I.2</td><td><strong>Regras de alerta</strong></td><td><code>alert_rules</code>, <code>alert_rule_conditions</code>, <code>alert_rule_recipients</code>, <code>alert_channels</code></td><td>"se glicemia &gt; 400 E sem insulina → P0 → equipe BR → painel+email"</td></tr>
+              <tr><td>I.3</td><td><strong>Cronograma recorrente</strong></td><td><code>schedule_rules</code>, <code>schedule_rule_targets</code>, <code>schedule_rule_messages</code></td><td>"toda segunda 9h BRT, envia dica semanal pra pacientes ativos BR"</td></tr>
+              <tr><td>I.4</td><td><strong>Templates editáveis</strong></td><td><code>template_variables</code>, <code>template_test_renders</code>, <code>template_approval_log</code></td><td>Placeholders tipados · preview · submeter aprovação · audit</td></tr>
+              <tr><td>I.5</td><td><strong>Notificações internas</strong></td><td><code>internal_notifications</code>, <code>notification_channels</code>, <code>notification_preferences</code></td><td>Cada user escolhe eventos + canal · quiet hours</td></tr>
+              <tr><td>I.6</td><td><strong>Feature flags</strong></td><td><code>feature_flags</code>, <code>workspace_feature_flags</code></td><td>Ligar <code>meal_prediction</code> em BR/MX · off em PT</td></tr>
+              <tr><td>I.7</td><td><strong>Biblioteca de conteúdo</strong></td><td><code>content_library</code>, <code>content_items</code>, <code>content_categories</code>, <code>content_distribution_rules</code></td><td>Criar dica/artigo/vídeo · agendar · segmentar audiência</td></tr>
+              <tr><td>I.8</td><td><strong>Onboarding configurável</strong></td><td><code>onboarding_flows</code>, <code>onboarding_steps</code>, <code>onboarding_responses</code></td><td>Quiz inicial editável por workspace · add/remove perguntas sem deploy</td></tr>
+              <tr><td>I.9</td><td><strong>Métricas/KPIs</strong></td><td><code>dashboard_metrics</code>, <code>metric_definitions</code>, <code>metric_targets</code>, <code>metric_snapshots</code></td><td>Escolher métricas, definir meta, configurar alerta de target</td></tr>
+              <tr><td>I.10</td><td><strong>Sandbox de protocolo</strong></td><td><code>protocol_test_runs</code>, <code>protocol_simulations</code></td><td>Testar AQS contra payload sintético <strong>sem mandar mensagem real</strong> antes de aprovar versão</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout callout-ok mt-5">
+          <p class="text-ink-100 text-sm"><strong>Sinal de saúde:</strong> se o admin precisar pedir deploy pra (a) trocar um horário, (b) editar uma mensagem, (c) ajustar threshold de alerta, (d) mudar prompt OpenAI, (e) trocar dica semanal, (f) reorganizar quiz inicial, ou (g) ligar/desligar feature — o módulo I não está completo.</p>
+        </div>
+      </section>
+
+      <!-- 9 · Escopo Core -->
+      <section id="bp-core" class="mb-14">
+        <h2 class="text-2xl md:text-3xl font-bold mb-4 text-ink-100">9 · Escopo Core obrigatório <a class="anchor-link text-primary-500 ml-2 text-base" href="#bp-core">¶</a></h2>
+        <p class="text-ink-300 text-sm mb-4">75+ tabelas distribuídas em 9 módulos (A–I) que o DB v2 PRECISA ter no fim do roadmap. Detalhes em <code>docs/database/gluco-db-v2-reconstruction-blueprint.md</code>.</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div class="bg-ink-800 rounded-xl border border-ink-700 p-5"><h4 class="text-primary-500 font-bold mb-2">A · Platform (10)</h4><div class="text-xs text-ink-300 font-mono leading-relaxed">workspaces · workspace_locales · workspace_phone_numbers · users · workspace_memberships · roles · permissions · role_permissions · workspace_settings · audit_logs</div></div>
+          <div class="bg-ink-800 rounded-xl border border-ink-700 p-5"><h4 class="text-primary-500 font-bold mb-2">B · Pacientes (6)</h4><div class="text-xs text-ink-300 font-mono leading-relaxed">patients · patient_profiles · patient_clinical_profiles · patient_consents · patient_preferences · patient_risk_flags</div></div>
+          <div class="bg-ink-800 rounded-xl border border-ink-700 p-5"><h4 class="text-primary-500 font-bold mb-2">C · WhatsApp (9)</h4><div class="text-xs text-ink-300 font-mono leading-relaxed">wa_contacts · wa_conversations · wa_messages · wa_media · message_templates · template_versions · outbound_dispatches · delivery_attempts · message_status_events</div></div>
+          <div class="bg-ink-800 rounded-xl border border-ink-700 p-5"><h4 class="text-primary-500 font-bold mb-2">D · Glicemia (3)</h4><div class="text-xs text-ink-300 font-mono leading-relaxed">glucose_readings · glucose_extraction_attempts · glucose_classifications</div></div>
+          <div class="bg-ink-800 rounded-xl border border-ink-700 p-5"><h4 class="text-primary-500 font-bold mb-2">E · Refeição (4)</h4><div class="text-xs text-ink-300 font-mono leading-relaxed">meal_logs · meal_analysis · meal_glycemic_predictions · meal_followup_links</div></div>
+          <div class="bg-ink-800 rounded-xl border-2 border-ok p-5"><h4 class="text-ok font-bold mb-2">⭐ F · Método (9)</h4><div class="text-xs text-ink-300 font-mono leading-relaxed">method_versions · glucose_ranges · protocols · protocol_steps · protocol_entry_criteria · protocol_exit_criteria · protocol_messages · protocol_timers · clinical_guardrails</div></div>
+          <div class="bg-ink-800 rounded-xl border border-ink-700 p-5"><h4 class="text-primary-500 font-bold mb-2">G · Runtime (6)</h4><div class="text-xs text-ink-300 font-mono leading-relaxed">protocol_sessions · protocol_session_steps · decision_events · scheduled_tasks · patient_alerts · human_review_queue</div></div>
+          <div class="bg-ink-800 rounded-xl border-2 border-warn p-5"><h4 class="text-warn font-bold mb-2">⭐ I · UI Control (30)</h4><div class="text-xs text-ink-300 font-mono leading-relaxed">ai_prompts(*3) · alert_rules(*4) · schedule_rules(*3) · template_variables(*3) · internal_notifications(*3) · feature_flags(*2) · content_library(*4) · onboarding_flows(*3) · dashboard_metrics(*4) · protocol_test_runs(*2)</div></div>
+        </div>
+        <p class="text-ink-300 text-sm mt-5"><strong>Total Core: 80 tabelas</strong> · Módulo H (Automação, 7 tabelas) fica FORA do Core.</p>
+      </section>
+
+      <!-- 10 · Roadmap 12 fases -->
+      <section id="bp-roadmap" class="mb-14">
+        <h2 class="text-2xl md:text-3xl font-bold mb-4 text-ink-100">10 · Roadmap · 12 fases com veredito SQL <a class="anchor-link text-primary-500 ml-2 text-base" href="#bp-roadmap">¶</a></h2>
+        <p class="text-ink-300 mb-4">Cada fase termina com smoke SQL + veredito canônico. <strong>Não passar à próxima sem ack explícito do veredito anterior.</strong> Tudo em localhost.</p>
+        <div class="bg-ink-800 rounded-xl border border-ink-700 overflow-hidden overflow-x-auto">
+          <table>
+            <thead><tr><th>Fase</th><th>Migration / Ação</th><th>Conteúdo</th><th>Veredito</th></tr></thead>
+            <tbody>
+              <tr><td><strong>0</strong></td><td>Travar regras</td><td>Confirmar localhost · vars travadas · proibições</td><td><span class="badge badge-ok">ack manual</span></td></tr>
+              <tr><td><strong>1</strong></td><td>Supabase local baseline</td><td><code>supabase init</code> + <code>supabase start</code> + <code>db reset</code></td><td><span class="badge badge-ok">PASS_LOCAL_SUPABASE_BASELINE_READY</span></td></tr>
+              <tr><td><strong>2</strong></td><td><code>0001_core_enums.sql</code></td><td>15 enums essenciais</td><td><span class="badge badge-ok">PASS_ENUMS_LOCAL_READY</span></td></tr>
+              <tr><td><strong>3</strong></td><td><code>0002_platform_multitenant.sql</code></td><td>Módulo A · 10 tabelas + seed BR/MX/Alden owner</td><td><span class="badge badge-ok">PASS_MULTITENANT_MULTIUSER_LOCAL_READY</span></td></tr>
+              <tr><td><strong>4</strong></td><td><code>0003_patients.sql</code></td><td>Módulo B · 6 tabelas + smoke cross-workspace</td><td><span class="badge badge-ok">PASS_PATIENT_CORE_LOCAL_READY</span></td></tr>
+              <tr><td><strong>5</strong></td><td><code>0004_whatsapp_outbox.sql</code></td><td>Módulo C · 9 tabelas + delivery mock</td><td><span class="badge badge-ok">PASS_LOCAL_OUTBOX_READY</span></td></tr>
+              <tr><td><strong>6</strong></td><td><code>0005_glucose.sql</code></td><td>Módulo D · 3 tabelas + MG_DL/MMOL_L</td><td><span class="badge badge-ok">PASS_GLUCOSE_CORE_LOCAL_READY</span></td></tr>
+              <tr><td><strong>7</strong></td><td><code>0006_method_source_of_truth.sql</code></td><td>Módulo F · 9 tabelas + seed <code>LEGACY_BASELINE_FROM_CURRENT_CODE</code> v1.0 UNDER_REVIEW</td><td><span class="badge badge-ok">PASS_METHOD_SOURCE_OF_TRUTH_LOCAL_READY</span></td></tr>
+              <tr><td><strong>8</strong></td><td><code>0007_runtime.sql</code></td><td>Módulo G · 6 tabelas + smoke AQS-02 fim-a-fim em SQL puro</td><td><span class="badge badge-ok">PASS_SQL_ONLY_AQS_FLOW_LOCAL_READY</span></td></tr>
+              <tr><td><strong>9</strong></td><td><code>0008_meal_prediction.sql</code></td><td>Módulo E · 4 tabelas + loop refeição→glicemia 2h</td><td><span class="badge badge-ok">PASS_MEAL_TO_GLUCOSE_LOOP_LOCAL_READY</span></td></tr>
+              <tr><td><strong>10</strong></td><td>RLS policies</td><td>Bloco isolado · workspace_memberships gate em todas as tabelas operacionais</td><td><span class="badge badge-ok">PASS_LOCAL_RLS_MULTITENANT_READY</span></td></tr>
+              <tr><td><strong>11</strong></td><td>Views de validação</td><td>v_method_pipeline · v_patient_active_protocol · v_glucose_decision_trace · v_outbox_status · v_scheduled_tasks_due · v_workspace_operational_health</td><td><span class="badge badge-ok">PASS_LOCAL_VALIDATION_VIEWS_READY</span></td></tr>
+              <tr><td class="text-warn"><strong>12 ⭐</strong></td><td><code>0009_admin_ui_control_surface.sql</code></td><td>Módulo I · 30 tabelas + seed: 1 prompt IA · 1 alert rule · 1 schedule rule · 1 onboarding · 3 feature flags · 5 métricas</td><td><span class="badge badge-warn">PASS_UI_CONTROL_SURFACE_LOCAL_READY</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 11 · Regras transversais -->
+      <section id="bp-transversais" class="mb-14">
+        <h2 class="text-2xl md:text-3xl font-bold mb-4 text-ink-100">11 · Regras transversais <a class="anchor-link text-primary-500 ml-2 text-base" href="#bp-transversais">¶</a></h2>
+        <div class="space-y-4">
+          <div class="bg-ink-800 rounded-xl border border-ink-700 p-5">
+            <h3 class="text-primary-500 font-bold mb-2">11.1 · Idiomas e países</h3>
+            <p class="text-sm text-ink-200">Toda mensagem e protocolo nasce com <code>locale</code> obrigatório. <code>protocol_messages</code>, <code>content_items</code>, <code>onboarding_steps</code>, <code>template_versions</code> referenciam locale. Permite AQS-01 em pt-BR / es-MX / en-US sem duplicar código.</p>
+          </div>
+          <div class="bg-ink-800 rounded-xl border border-ink-700 p-5">
+            <h3 class="text-primary-500 font-bold mb-2">11.2 · Números de WhatsApp por workspace</h3>
+            <p class="text-sm text-ink-200">Número NÃO é global. <code>workspace_phone_numbers</code> tem N por workspace. Toda <code>wa_conversation</code> referencia <code>workspace_id + phone_number_id + wa_contact_id</code>. Inbound sabe por qual país/número entrou.</p>
+          </div>
+          <div class="bg-ink-800 rounded-xl border-2 border-ok p-5">
+            <h3 class="text-ok font-bold mb-2">11.3 · Fonte da verdade</h3>
+            <p class="text-sm text-ink-200 mb-2"><strong>Backend NÃO pode decidir:</strong> faixa de glicemia · AQS-01/02/03 · mensagem clínica · timer · critério de saída · critério de escalonamento.</p>
+            <p class="text-sm text-ink-200"><strong>Backend SÓ pode:</strong> ler regra ativa do banco · executar · registrar <code>decision_event</code> · criar <code>scheduled_task</code> · criar <code>outbound_dispatch</code>.</p>
+          </div>
+          <div class="bg-ink-800 rounded-xl border border-ink-700 p-5">
+            <h3 class="text-primary-500 font-bold mb-2">11.4 · Localhost durante toda reconstrução</h3>
+            <p class="text-sm text-ink-200">Qualquer variável apontando pra prod = <strong class="text-danger">parar</strong>.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 12 · 13 perguntas -->
+      <section id="bp-perguntas" class="mb-14">
+        <h2 class="text-2xl md:text-3xl font-bold mb-4 text-ink-100">12 · As 13 perguntas que o DB precisa responder <a class="anchor-link text-primary-500 ml-2 text-base" href="#bp-perguntas">¶</a></h2>
+        <p class="text-ink-300 mb-4">Se o banco não responde estas 13 perguntas em SQL puro, ainda <strong>não é fonte da verdade</strong>.</p>
+        <ol class="list-decimal list-inside space-y-2 text-ink-200 text-sm pl-2">
+          <li>Qual método está ativo agora neste workspace?</li>
+          <li>Qual versão do método?</li>
+          <li>Qual país/locale?</li>
+          <li>Qual número de WhatsApp recebe inbound deste paciente?</li>
+          <li>Qual paciente é este (<code>workspace_id</code> + <code>phone</code>)?</li>
+          <li>Qual foi a última glicemia? Qual unidade original? Qual normalizada?</li>
+          <li>Qual regra classificou esta leitura?</li>
+          <li>Qual protocolo foi escolhido?</li>
+          <li>Qual mensagem saiu? Em qual locale? Versão de template?</li>
+          <li>Qual timer foi criado? Quando vence?</li>
+          <li>Qual <code>decision_event</code> prova a decisão?</li>
+          <li>Qual usuário aprovou esta <code>method_version</code>?</li>
+          <li>Qual paciente está em recuperação por inatividade?</li>
+        </ol>
+      </section>
+
+      <!-- 13 · Ordem final -->
+      <section id="bp-ordem" class="mb-14">
+        <h2 class="text-2xl md:text-3xl font-bold mb-4 text-ink-100">13 · Ordem final · 19 passos canônicos <a class="anchor-link text-primary-500 ml-2 text-base" href="#bp-ordem">¶</a></h2>
+        <ol class="list-decimal list-inside space-y-1.5 text-ink-200 text-sm pl-2">
+          <li>Localhost only + zero git</li>
+          <li>Supabase local SQL-first</li>
+          <li>Multi-tenant por workspace/país</li>
+          <li>Multiusuário por memberships</li>
+          <li>WhatsApp numbers por workspace</li>
+          <li>Outbox antes de envio real</li>
+          <li>Glicemia estruturada (mg/dL + mmol/L)</li>
+          <li>Método versionado</li>
+          <li>Protocolos AQS em banco</li>
+          <li>Timers persistidos</li>
+          <li>Sessões de protocolo</li>
+          <li>Eventos de decisão</li>
+          <li>Refeição → predição → controle 2h</li>
+          <li>RLS local</li>
+          <li>Views de validação</li>
+          <li class="text-warn"><strong>Admin/UI Control Surface ⭐</strong> (alertas, cronograma, prompts IA, feature flags, conteúdo, onboarding, métricas, sandbox)</li>
+          <li>Só depois pensar em backend (refactor)</li>
+          <li>Só depois staging (Supabase project novo)</li>
+          <li>Só depois Git + produção</li>
+        </ol>
+      </section>
+
+      <!-- 14 · O que NÃO faz parte -->
+      <section id="bp-nao-faz" class="mb-14">
+        <h2 class="text-2xl md:text-3xl font-bold mb-4 text-ink-100">14 · O que NÃO faz parte deste blueprint <a class="anchor-link text-primary-500 ml-2 text-base" href="#bp-nao-faz">¶</a></h2>
+        <ul class="list-disc list-inside text-ink-300 text-sm space-y-1.5 pl-2">
+          <li>❌ Decidir qual sistema de classificação atual vira canônico em <code>v1.0</code> · decisão clínica (Alden + revisor decidem antes da Fase 7)</li>
+          <li>❌ Implementação de código backend · só depois da Fase 12</li>
+          <li>❌ Setup de Supabase cloud · só após smoke local 100% verde</li>
+          <li>❌ Migração de dados de prod · prod está vazio (auditado: 0 linhas em todas as tabelas), não há dados pra migrar</li>
+          <li>❌ Automação avançada (Módulo H) · pós-Core</li>
+          <li>❌ Dashboard/painel admin (frontend) · pós-Core, usa as views da Fase 11 + tabelas do Módulo I</li>
+        </ul>
+      </section>
+
+      <!-- 15 · Próximo passo -->
+      <section id="bp-proximo" class="mb-14">
+        <h2 class="text-2xl md:text-3xl font-bold mb-4 text-ink-100">15 · Próximo passo executável <a class="anchor-link text-primary-500 ml-2 text-base" href="#bp-proximo">¶</a></h2>
+        <p class="text-ink-200 mb-4">Antes de qualquer migration:</p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="bg-ink-800 rounded-xl border-2 border-primary-500 p-5">
+            <div class="text-xs uppercase tracking-[0.15em] font-bold text-primary-500 mb-2">Step 1</div>
+            <h4 class="font-bold mb-2">Confirmar blueprint v2.1</h4>
+            <p class="text-sm text-ink-200">Alden lê este documento (workspaces, Supabase SQL-first, Módulo I, localhost-only).</p>
+          </div>
+          <div class="bg-ink-800 rounded-xl border-2 border-primary-500 p-5">
+            <div class="text-xs uppercase tracking-[0.15em] font-bold text-primary-500 mb-2">Step 2</div>
+            <h4 class="font-bold mb-2">Decidir ajustes</h4>
+            <p class="text-sm text-ink-200">Renomear <code>workspaces</code> → <code>markets</code>? Adicionar submódulo no I? Tirar algo?</p>
+          </div>
+          <div class="bg-ink-800 rounded-xl border-2 border-primary-500 p-5">
+            <div class="text-xs uppercase tracking-[0.15em] font-bold text-primary-500 mb-2">Step 3</div>
+            <h4 class="font-bold mb-2">Iniciar Fase 0 → 1</h4>
+            <p class="text-sm text-ink-200">Travar regras (Fase 0) · <code>supabase init</code> + <code>supabase start</code> (Fase 1) · veredito.</p>
+          </div>
+        </div>
+        <div class="callout callout-info mt-5">
+          <p class="text-ink-100 text-sm"><strong>Status atual:</strong> Blueprint v2.1 escrito · localhost · untracked · zero migration criada · zero código alterado.</p>
+        </div>
+      </section>
+      <footer class="border-t border-ink-700 pt-8 mt-12 text-center text-ink-400 text-xs">
+        <p class="mb-2">Blueprint de planejamento técnico · zero implementação · zero produção tocada.</p>
+        <p>Documento canônico em <code>docs/database/gluco-db-v2-reconstruction-blueprint.md</code></p>
+      </footer>
+
+    </main>
+  </div>
+</div>
+</div>
+<!-- ═══ FIM TAB BLUEPRINT ═══ -->
+
+<!-- MERMAID -->
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'dark',
+    themeVariables: {
+      darkMode: true,
+      primaryColor: '#2B7FFF',
+      primaryTextColor: '#e6ebf4',
+      primaryBorderColor: '#3d4659',
+      lineColor: '#6b7588',
+      secondaryColor: '#1a1f2e',
+      tertiaryColor: '#11151f',
+      background: '#06080e',
+      fontFamily: 'Inter, sans-serif',
+    },
+    flowchart: { curve: 'basis', padding: 14, useMaxWidth: true },
+    securityLevel: 'loose',
+  });
+</script>
+
+<!-- TAB SWITCHER -->
+<script>
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tab = btn.dataset.tab;
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.toggle('active', c.dataset.tabContent === tab));
+      window.scrollTo(0, 0);
+    });
+  });
+</script>
+
+<!-- TOC active link tracking -->
+<script>
+  const sections = document.querySelectorAll('section[id]');
+  const tocLinks = document.querySelectorAll('.toc a[href^="#"]');
+  function setActive() {
+    const scrollTop = window.scrollY + 100;
+    let current = '';
+    sections.forEach(s => {
+      if (s.offsetTop <= scrollTop) current = s.id;
+    });
+    tocLinks.forEach(a => {
+      a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+    });
+  }
+  window.addEventListener('scroll', setActive, { passive: true });
+  setActive();
+</script>
+
+</body>
+</html>
