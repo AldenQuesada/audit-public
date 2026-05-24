@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Gluco AI · Auditoria End-to-End · Método AQS · v2 com SQL real</title>
-<meta name="description" content="Auditoria read-only completa do Método de Controle Rápido da Glicemia · Protocolo AQS · do Gluco AI · 2026-05-15 · v2 validada em Postgres real" />
+<title>Gluco AI · Auditoria End-to-End · v3 Comparação Antes/Depois · 09477ca → 4c5fd1f</title>
+<meta name="description" content="Auditoria comparativa Antes/Depois · 2026-05-15 (09477ca) vs 2026-05-24 (4c5fd1f) · Método de Controle Rápido da Glicemia · Protocolo AQS · Gluco AI" />
 <meta name="theme-color" content="#0a0d18" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -53,6 +53,25 @@
   .callout-review { background: rgba(245,158,11,.08); border-color: #f59e0b; }
   .callout-ok { background: rgba(16,185,129,.08); border-color: #10b981; }
   .callout-info { background: rgba(43,127,255,.08); border-color: #2B7FFF; }
+  /* Depois (v3 comparison) blocks */
+  .depois-block { margin-top: 22px; border: 2px solid; border-radius: 14px; overflow: hidden; }
+  .depois-block-fechado { border-color: #10b981; background: linear-gradient(180deg, rgba(16,185,129,.10) 0%, rgba(16,185,129,.03) 100%); }
+  .depois-block-parcial { border-color: #f59e0b; background: linear-gradient(180deg, rgba(245,158,11,.10) 0%, rgba(245,158,11,.03) 100%); }
+  .depois-block-aberto  { border-color: #ef4444; background: linear-gradient(180deg, rgba(239,68,68,.10) 0%, rgba(239,68,68,.03) 100%); }
+  .depois-block-misto   { border-color: #7c9eff; background: linear-gradient(180deg, rgba(124,158,255,.10) 0%, rgba(124,158,255,.03) 100%); }
+  .depois-header { padding: 10px 18px; font-size: 11.5px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(255,255,255,.06); }
+  .depois-header-fechado { background: rgba(16,185,129,.14); color: #10b981; }
+  .depois-header-parcial { background: rgba(245,158,11,.14); color: #f59e0b; }
+  .depois-header-aberto  { background: rgba(239,68,68,.14); color: #ef4444; }
+  .depois-header-misto   { background: rgba(124,158,255,.14); color: #7c9eff; }
+  .depois-body { padding: 16px 20px; color: #c6cddd; line-height: 1.65; }
+  .depois-body p { margin: 0 0 10px 0; }
+  .depois-body p:last-child { margin-bottom: 0; }
+  .depois-body ul { margin: 8px 0 0 0; padding-left: 22px; }
+  .depois-body li { margin: 4px 0; }
+  .depois-body strong.tag-fechado { color: #10b981; }
+  .depois-body strong.tag-parcial { color: #f59e0b; }
+  .depois-body strong.tag-aberto { color: #ef4444; }
   /* badge */
   .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 999px; font-size: 10.5px; font-weight: 700; line-height: 1; white-space: nowrap; }
   .badge-fail { background: rgba(239,68,68,.12); color: #ef4444; }
@@ -97,13 +116,13 @@
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
     </div>
     <div class="min-w-0 flex-1">
-      <div class="text-[10px] uppercase tracking-[0.2em] text-ink-400 font-bold">Auditoria · Read-only</div>
-      <div class="text-sm font-semibold text-ink-100 truncate">Gluco AI · Método AQS · Controle Rápido da Glicemia</div>
+      <div class="text-[10px] uppercase tracking-[0.2em] text-ink-400 font-bold">Auditoria · Read-only · v3 Comparação Antes/Depois</div>
+      <div class="text-sm font-semibold text-ink-100 truncate">Gluco AI · Método AQS · 09477ca → 4c5fd1f</div>
     </div>
     <div class="hidden md:flex items-center gap-2 flex-shrink-0">
-      <span class="badge badge-fail">🔴 FAIL_DB</span>
-      <span class="badge badge-fail">🔴🔴 SCHEMA_DRIFT_55%</span>
-      <span class="badge badge-muted hidden lg:inline">v2 · 2026-05-15</span>
+      <span class="badge badge-muted">Antes 2026-05-15</span>
+      <span class="badge" style="background:rgba(16,185,129,.14);color:#10b981">→ Depois 2026-05-24</span>
+      <span class="badge" style="background:rgba(245,158,11,.14);color:#f59e0b" class="hidden lg:inline">PARCIALMENTE RESOLVIDO</span>
     </div>
     <button onclick="window.print()" class="no-print text-ink-300 hover:text-primary-500 transition-colors p-2 rounded-lg hover:bg-ink-700" aria-label="Imprimir">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
@@ -161,21 +180,19 @@
           Método de <span class="gradient-text">Controle Rápido</span><br/>da Glicemia · <span class="gradient-text">Gluco AI</span>
         </h1>
         <p class="text-ink-300 text-base md:text-lg max-w-3xl leading-relaxed">
-          Read-only audit. Zero <code>INSERT/UPDATE/DELETE/DDL/deploy/commit/push/provider call</code>.
-          Realizada em <strong class="text-ink-100">2026-05-15</strong> sobre <code>main</code> HEAD <code>09477ca</code> do repo <code>github.com/glucoai/glucoai</code>.
-          Toda afirmação material tem evidência rastreável (<code>arquivo:linha</code>, migration ou query SQL).
+          Read-only audit comparativo. Versão original em <strong class="text-ink-100">2026-05-15</strong> @ <code>09477ca</code>.
+          Versão Depois em <strong class="text-ok">2026-05-24</strong> @ <code>4c5fd1f</code> · 9 dias de trabalho focado em fechar gaps
+          (commits <code>"Resolucao de gaps de auditoria"</code> + v1→v5 de <code>"transferencia de hardcoded para banco"</code>).
+          Conteúdo original preservado integralmente em cada seção; o bloco <span class="badge" style="background:rgba(16,185,129,.14);color:#10b981">DEPOIS · 2026-05-24</span> mostra o estado atual.
         </p>
         <div class="flex flex-wrap items-center gap-2 mt-5">
-          <span class="badge badge-fail">🔴 FAIL_DB_NOT_SOURCE_OF_TRUTH</span>
-          <span class="badge badge-fail">🔴🔴 SCHEMA_DRIFT_55%</span>
-          <span class="badge badge-ok">✅ Validado em Postgres real</span>
-          <span class="badge badge-muted">Branch: main</span>
-          <span class="badge badge-muted">HEAD: 09477ca</span>
-          <span class="badge badge-muted">v2 · 2026-05-15</span>
+          <span class="badge badge-muted">Antes: <code>09477ca</code> · 2026-05-15</span>
+          <span class="badge" style="background:rgba(16,185,129,.14);color:#10b981">Depois: <code>4c5fd1f</code> · 2026-05-24</span>
+          <span class="badge badge-muted">219 arquivos · +6350 / −10122</span>
         </div>
 
         <div class="callout callout-fail mt-6" style="border-color:#ef4444;background:rgba(239,68,68,.10)">
-          <div class="text-xs uppercase tracking-[0.15em] font-bold text-danger mb-2">⚠️ Atualização v2 · 15/maio</div>
+          <div class="text-xs uppercase tracking-[0.15em] font-bold text-danger mb-2">⚠️ Atualização v2 · 15/maio (preservada)</div>
           <p class="text-ink-100 leading-relaxed">
             Esta auditoria foi <strong>validada com Postgres real</strong> (Neon 17 · SP) aplicando as 8 migrations do repo e rodando
             21 queries read-only. Resultado revelou <strong class="text-danger">um achado MAIS GRAVE</strong> que o veredito original:
@@ -184,6 +201,19 @@
             <code>Lead</code>, B2B inteiro) <strong>não existem no banco</strong> mesmo após aplicar as migrations canônicas.
             Veja <a href="#drift" class="text-primary-500 underline">seção 1b · DRIFT</a> e <a href="#sql-real" class="text-primary-500 underline">14b · Comprovação SQL</a>.
           </p>
+        </div>
+
+        <div class="depois-block depois-block-misto mt-6">
+          <div class="depois-header depois-header-misto">📅 Depois · 2026-05-24 · HEAD <code style="color:inherit;background:transparent;border:0;padding:0">4c5fd1f</code> · Placar geral</div>
+          <div class="depois-body">
+            <p>De 12 achados verificados objetivamente: <strong class="tag-fechado">5 FECHADOS</strong>, <strong class="tag-parcial">6 PARCIAIS</strong>, <strong class="tag-aberto">1 ABERTO</strong>.</p>
+            <p>O risco mudou de <em>estrutural</em> (DB não suporta o método) para <em>operacional</em> (DB suporta mas runtime ainda escreve em dois caminhos paralelos: <code>SessaoProtocolo</code> + <code>Paciente.onboardingDados._eventoPremium</code>). Mais difícil de detectar do que ausência de tabela.</p>
+            <ul style="margin-top:10px">
+              <li><strong class="tag-fechado">FECHADOS</strong>: Schema drift (55% → 0%), Cron/Outbox/Timer, mmol/L, "chá+vitamina+escalda" hardcoded, scheduling 1h+2h</li>
+              <li><strong class="tag-parcial">PARCIAIS</strong>: Método AQS em DB (paralelo a JSON), 4 classificadores fallback, validação 30-600 (3 ranges convivem), RLS (script existe fora do pipeline), Glicemia.unidade (REST sim, WhatsApp não), 50+ mensagens hardcoded (1/37 migradas)</li>
+              <li><strong class="tag-aberto">ABERTO</strong>: Threshold 250 sem fallback (<code>automationWorker.ts:112</code> sem diff)</li>
+            </ul>
+          </div>
         </div>
       </div>
 
@@ -199,6 +229,14 @@
             O estado runtime do AQS está empurrado num campo JSON arbitrário <code>Paciente.onboardingDados._eventoPremium</code> · sem schema, sem RLS específica, sem auditoria. Três classificadores de glicemia diferentes coexistem no codebase com faixas inconsistentes. Não há tabela de outbox/dispatch · todo <code>setInterval</code>/<code>cron</code> chama send-now síncrono.
           </p>
           <p class="text-ink-100 font-semibold mt-3">O banco não pode hoje ser tratado como fonte da verdade do método clínico.</p>
+        </div>
+
+        <div class="depois-block depois-block-parcial">
+          <div class="depois-header depois-header-parcial">📅 Depois · 2026-05-24 · Veredito atualizado</div>
+          <div class="depois-body">
+            <p><strong class="tag-parcial">PARCIALMENTE RESOLVIDO.</strong> O DB <em>agora pode</em> servir de fonte da verdade: as tabelas existem (<code>ProtocoloClinico</code>, <code>AcaoProtocolo</code>, <code>FaixaGlicemica</code>, <code>SessaoProtocolo</code>, <code>EventoDecisao</code>, <code>TimerAgendamento</code>, <code>OutboxWhatsApp</code>, <code>MensagemSistema</code>, <code>SintomaAlerta</code>, <code>MetodoVersao</code>, <code>PredicaoAlimentar</code>) e há seeds reais (<code>seed-aqs.ts</code>, <code>seed.ts</code>, <code>force-seed-protocolos.ts</code>).</p>
+            <p>Mas o runtime ainda mantém <strong>dois caminhos vivos em paralelo</strong>: o caminho novo lê <code>ProtocoloClinico.acoes</code> via <code>obterAcoesProtocolo</code>, enquanto <code>apps/backend/src/modulos/whatsapp/repository.ts</code> continua escrevendo state como JSON em <code>Paciente.onboardingDados._eventoPremium</code> (18 ocorrências entre linhas 264–481). Tradução: <em>passaram de "DB não pode" para "DB pode, mas há dupla fonte de verdade silenciosa"</em>.</p>
+          </div>
         </div>
       </section>
 
@@ -309,6 +347,20 @@ psql $URL_BANCO -c "
   WHERE table_schema='public' ORDER BY table_name;
 "
 # resultado: 9 tabelas · não 20</code></pre>
+
+        <div class="depois-block depois-block-fechado">
+          <div class="depois-header depois-header-fechado">📅 Depois · 2026-05-24 · DRIFT 55% → 0%</div>
+          <div class="depois-body">
+            <p><strong class="tag-fechado">FECHADO</strong> (estruturalmente). O <code>schema.prisma</code> agora declara <strong>33 models</strong> (era 20) e as 8 migrations antigas foram <strong>deletadas e substituídas</strong> por uma única <code>apps/backend/prisma/migrations/20260523150000_baseline_consolidada/migration.sql</code> (850 linhas, 33 <code>CREATE TABLE</code>).</p>
+            <p>Todas as <strong>11 tabelas que estavam ausentes</strong> foram verificadas 1:1 com <code>CREATE TABLE</code> na baseline:</p>
+            <ul>
+              <li><code>Lead</code> ✓ &nbsp; <code>ConviteUsuario</code> ✓ &nbsp; <code>TemplateWhatsapp</code> ✓ &nbsp; <code>Automacao</code> ✓ &nbsp; <code>ExecucaoAutomacao</code> ✓</li>
+              <li><code>Tarefa</code> ✓ &nbsp; <code>PacientePlano</code> ✓ &nbsp; <code>PacienteContrato</code> ✓ &nbsp; <code>PacientePagamentoClinico</code> ✓ &nbsp; <code>ClinicaConfig</code> ✓ &nbsp; <code>UsuarioConfig</code> ✓</li>
+            </ul>
+            <p style="margin-top:10px"><strong>⚠ Caveat operacional</strong>: o baseline reset apagou 8 migrations históricas e gerou 1 nova. Funciona para dev/staging novos, mas em <strong>prod com dados existentes</strong> esse reset força <code>prisma migrate resolve</code> manual — sem script automatizando.</p>
+            <p>Commit responsável: <code>66e6f78</code> "Resolucao de gaps de auditoria". Nenhum vestígio de <code>db push</code> em <code>package.json</code> (linha 13: <code>"seed": "prisma db seed"</code>).</p>
+          </div>
+        </div>
       </section>
 
       <!-- 2 · ESTADO REPO -->
@@ -327,6 +379,22 @@ psql $URL_BANCO -c "
               <tr><td><strong>Limitação</strong></td><td>Sem credenciais runtime · não provei <code>cron.job</code>, <code>RLS</code> efetivos, <code>triggers</code>, <code>views</code> em runtime. Mas Prisma é ORM única ativa · auditoria do schema-de-código é representativa.</td></tr>
             </tbody>
           </table>
+        </div>
+
+        <div class="depois-block depois-block-fechado">
+          <div class="depois-header depois-header-fechado">📅 Depois · 2026-05-24 · Estado do repositório</div>
+          <div class="depois-body">
+            <p><strong>HEAD</strong>: <code>4c5fd1f</code> "Ajustes finais de transferencia de hd (hardcoded) para banco de dados. v5" (2026-05-24 01:58 -0300)</p>
+            <p><strong>Diff agregado 09477ca→HEAD</strong>: 219 arquivos · +6350 / −10122 linhas (líquido −3772).</p>
+            <p><strong>Commits-chave</strong> no intervalo:</p>
+            <ul>
+              <li><code>66e6f78</code> — "Resolucao de gaps de auditoria" (baseline schema)</li>
+              <li><code>14a4ce4</code> — "Atualizacao de Auditoria"</li>
+              <li><code>141df98</code>, <code>ace9a50</code>, <code>4c5fd1f</code> — "Ajustes finais de transferencia de hd para banco" v3, v4, v5</li>
+              <li><code>3648f8b</code> — "Ajustes Configuracoes de Planos e Tipos"</li>
+            </ul>
+            <p>Stack inalterada (Vite/React + Fastify + Prisma + Redis + ia-worker). <strong>Novidades estruturais</strong>: <code>apps/backend/src/workers/{outboxWorker,timerWorker}.ts</code>, <code>apps/backend/src/utils/{normalizarGlicemia,validarGlicemia,redisLock}.ts</code>, <code>apps/backend/src/modulos/whatsapp/services/MessageDispatcher.ts</code>.</p>
+          </div>
         </div>
       </section>
 
@@ -352,6 +420,20 @@ psql $URL_BANCO -c "
               <tr><td><strong>Validação mg/dL vs mmol/L</strong></td><td>—</td><td>sempre <code>MG_DL</code></td><td>—</td><td>—</td><td><span class="badge badge-fail">NÃO IMPLEMENTADO</span></td></tr>
             </tbody>
           </table>
+        </div>
+
+        <div class="depois-block depois-block-misto">
+          <div class="depois-header depois-header-misto">📅 Depois · 2026-05-24 · Fluxos end-to-end</div>
+          <div class="depois-body">
+            <ul>
+              <li><strong>Texto de glicemia</strong>: agora normaliza via <code>utils/normalizarGlicemia.ts:12-41</code> (detecta mmol e multiplica por 18.0182), valida via <code>utils/validarGlicemia.ts</code> (20-800), classifica via <code>utils/classificarGlicemia.ts:21-62</code> que lê <code>FaixaGlicemica</code> do DB com cache 5min. <strong class="tag-fechado">PARCIAL→OK</strong></li>
+              <li><strong>Controle 2h pós-refeição</strong>: implementado. <code>handlers/mensagemGlicemia.ts:45-73</code> insere em <code>TimerAgendamento</code> com tipo <code>POS_PRANDIAL</code>; <code>workers/timerWorker.ts</code> processa a cada 1 min. <strong class="tag-fechado">NÃO ENCONTRADO → FECHADO</strong></li>
+              <li><strong>Rechecagem 1h</strong>: tipo <code>RECHECAGEM_AQS</code> em <code>TimerAgendamento</code>, agendado via <code>fluxoEventoPremium.ts:143,170</code> com <code>tempoMinutos</code> configurável em <code>AcaoProtocolo</code>. <strong class="tag-fechado">FECHADO</strong></li>
+              <li><strong>AQS-01/02/03 Premium</strong>: <code>fluxoEventoPremium.ts:140-162</code> lê <code>ProtocoloClinico.acoes</code> via <code>obterAcoesProtocolo(clinicaId, faixa)</code>. Mas state ainda persiste em <code>Paciente.onboardingDados._eventoPremium</code> em paralelo a <code>SessaoProtocolo</code>. <strong class="tag-parcial">PARCIAL</strong></li>
+              <li><strong>Validação mmol/L</strong>: detectada e convertida; <code>valorOriginal</code> + <code>unidadeOriginal</code> persistidos. Caminho REST honra payload; caminho WhatsApp normaliza valor mas grava sempre <code>unidade='MG_DL'</code> (<code>repository.ts:116</code>, <code>mensagemGlicemia.ts:92</code>). <strong class="tag-parcial">PARCIAL</strong></li>
+              <li><strong>Glicemia ≥250 dispara automação</strong>: <code>automationWorker.ts:112</code> sem diff entre os dois commits; threshold continua hardcoded sem fallback. <strong class="tag-aberto">ABERTO</strong></li>
+            </ul>
+          </div>
         </div>
       </section>
 
@@ -386,6 +468,29 @@ psql $URL_BANCO -c "
           <li>Validação mmol/L vs mg/dL</li>
           <li>Versionamento de método</li>
         </ul>
+
+        <div class="depois-block depois-block-fechado">
+          <div class="depois-header depois-header-fechado">📅 Depois · 2026-05-24 · Pipeline</div>
+          <div class="depois-body">
+            <p><strong class="tag-fechado">Agora presente</strong> (era "Não encontrado"):</p>
+            <ul>
+              <li>Agendamento <strong>rechecagem 1h</strong> via tabela <code>TimerAgendamento</code> + <code>workers/timerWorker.ts</code></li>
+              <li>Agendamento <strong>controle 2h pós-refeição</strong> idem (tipo <code>POS_PRANDIAL</code>)</li>
+              <li>Tabelas <strong>ProtocoloClinico + AcaoProtocolo + FaixaGlicemica + MensagemSistema + SintomaAlerta</strong></li>
+              <li><strong>OutboxWhatsApp</strong> + <code>workers/outboxWorker.ts</code> com retry backoff exponencial (<code>2^tentativas·30s</code>, máx 5)</li>
+              <li><strong>PredicaoAlimentar</strong> (tabela existe, ainda sem hook runtime)</li>
+              <li>Validação <strong>mmol/L</strong> via <code>utils/normalizarGlicemia.ts</code></li>
+              <li><strong>MetodoVersao</strong> (tabela existe; sem leitura runtime ainda)</li>
+              <li><strong>Distributed lock</strong>: <code>utils/redisLock.ts</code> (SET NX EX) envolve os 3 jobs em <code>plugins/cron.ts:15,29,42</code></li>
+            </ul>
+            <p><strong class="tag-parcial">Continuam parciais</strong>:</p>
+            <ul>
+              <li>AQS dupla persistência (DB <code>SessaoProtocolo</code> + JSON <code>_eventoPremium</code> escritos em paralelo)</li>
+              <li>Classificação continua com fonte DB <strong>+ 3 fallbacks divergentes</strong> hardcoded</li>
+              <li>RLS policies em script SQL fora do pipeline de migrations</li>
+            </ul>
+          </div>
+        </div>
       </section>
 
       <!-- 5 · BANCO FONTE DA VERDADE -->
@@ -421,6 +526,29 @@ psql $URL_BANCO -c "
               <tr><td>Thresholds por clínica/paciente</td><td><span class="badge badge-fail">❌</span></td><td><code>ClinicaConfig</code> só booleans</td><td>n/a</td><td><span class="badge badge-fail">FAIL</span></td></tr>
             </tbody>
           </table>
+        </div>
+
+        <div class="depois-block depois-block-misto">
+          <div class="depois-header depois-header-misto">📅 Depois · 2026-05-24 · Banco como fonte da verdade — delta linha-a-linha</div>
+          <div class="depois-body">
+            <p><strong class="tag-fechado">Migraram para DB</strong>:</p>
+            <ul>
+              <li><strong>Classificar faixa</strong>: <code>utils/classificarGlicemia.ts:21-62</code> agora lê <code>prisma.faixaGlicemica</code> por clínica (cache 5min). FAIL → <strong class="tag-fechado">PASS</strong></li>
+              <li><strong>Mensagem inicial AQS / volumes / chá+vitamina</strong>: <code>fluxoEventoPremium.ts:140-162</code> monta a partir de <code>protocoloClinico.acoes</code> (<code>tipoAcao='ENVIAR_MENSAGEM'</code>). FAIL → <strong class="tag-fechado">PASS</strong></li>
+              <li><strong>Agendar rechecagem 1h</strong> + <strong>Repetir até normalizar</strong>: <code>TimerAgendamento</code> com <code>RECHECAGEM_AQS</code> e <code>tempoMinutos</code> configurável em <code>AcaoProtocolo</code>. FAIL → <strong class="tag-fechado">PASS</strong></li>
+              <li><strong>Refeição × glicemia 2h depois</strong>: <code>POS_PRANDIAL</code> em <code>TimerAgendamento</code>. FAIL → <strong class="tag-fechado">PASS</strong></li>
+              <li><strong>Sintomas alerta</strong>: <code>fluxoEventoPremiumUtils.ts:150-166</code> lê <code>SintomaAlerta</code> + variações (cache 5min). Fallback hardcoded de 9 termos persiste só se DB falhar. FAIL → <strong class="tag-parcial">PARCIAL</strong></li>
+              <li><strong>Sessão de protocolo</strong>: tabela <code>SessaoProtocolo</code> populada por <code>fluxoEventoPremiumUtils.ts:287-322</code>. <strong class="tag-parcial">PARCIAL</strong> (caminho legacy ainda escreve em <code>_eventoPremium</code> JSON em paralelo)</li>
+              <li><strong>Versionamento de método</strong>: tabela <code>MetodoVersao</code> existe; sem hooks runtime lendo dela ainda. <strong class="tag-parcial">PARCIAL</strong></li>
+            </ul>
+            <p><strong class="tag-parcial">Continuam parciais / divergentes</strong>:</p>
+            <ul>
+              <li><strong>Validação 30-600</strong>: 3 ranges convivem — <code>roteadorMensagem.ts:10</code> (30-600), <code>validarGlicemia.ts</code> (20-800), <code>ia-worker/openai.ts:255</code> (2-800)</li>
+              <li><strong>Extrair valor (foto)</strong>: prompt OpenAI ainda hardcoded</li>
+              <li><strong>Thresholds por clínica</strong>: <code>FaixaGlicemica</code> tem coluna <code>clinicaId</code> mas seeds populam só globais</li>
+            </ul>
+            <p><strong class="tag-aberto">Continuam ABERTOS</strong>: extração de número (regex em <code>mensagemGlicemia.ts</code>), validação unidade global (WhatsApp grava sempre MG_DL).</p>
+          </div>
         </div>
       </section>
 
@@ -472,6 +600,34 @@ psql $URL_BANCO -c "
           <div class="bg-ink-800 rounded-lg border border-ink-700 p-4"><span class="badge badge-fail mb-2">❌</span><div class="font-mono text-sm">RLS policies</div><div class="text-ink-400 text-xs mt-1">multi-tenancy via WHERE clinicaId na app</div></div>
           <div class="bg-ink-800 rounded-lg border border-ink-700 p-4 md:col-span-2"><span class="badge badge-fail mb-2">❌</span><div class="font-mono text-sm">pg_cron</div><div class="text-ink-400 text-xs mt-1">scheduling via <code>node-cron</code> + <code>setInterval</code> in-process · sem lock distribuído</div></div>
         </div>
+
+        <div class="depois-block depois-block-misto">
+          <div class="depois-header depois-header-misto">📅 Depois · 2026-05-24 · Schema</div>
+          <div class="depois-body">
+            <p><strong>33 models</strong> em <code>apps/backend/prisma/schema.prisma</code> (era 20). Baseline única <code>20260523150000_baseline_consolidada/migration.sql</code> (850 linhas, 33 <code>CREATE TABLE</code>).</p>
+            <p><strong class="tag-fechado">Entidades clínicas novas presentes</strong> (todas eram "NÃO EXISTE" antes):</p>
+            <ul>
+              <li><code>ProtocoloClinico</code> + <code>AcaoProtocolo</code> (substituem <code>Protocolo</code>/<code>EtapaProtocolo</code> propostos)</li>
+              <li><code>FaixaGlicemica</code> com <code>clinicaId</code> nullable (config por clínica possível)</li>
+              <li><code>SessaoProtocolo</code> (uma execução de AQS por paciente)</li>
+              <li><code>EventoDecisao</code> (audit estruturado de decisão clínica)</li>
+              <li><code>TimerAgendamento</code> (rechecagem 1h, pós-prandial 2h, cancelável idempotente)</li>
+              <li><code>OutboxWhatsApp</code> (idempotência + retry com backoff)</li>
+              <li><code>PredicaoAlimentar</code> (tabela criada; sem uso runtime ainda)</li>
+              <li><code>MensagemSistema</code> (templates internos vs <code>TemplateWhatsapp</code> Meta-aprovados)</li>
+              <li><code>SintomaAlerta</code> (substituiu array hardcoded de 7 termos)</li>
+              <li><code>MetodoVersao</code> (tabela existe; sem leitura runtime ainda)</li>
+            </ul>
+            <p><strong class="tag-parcial">Constraints / Triggers / Views / Policies / Cron</strong>:</p>
+            <ul>
+              <li><strong>CHECK constraints</strong>: existem em <code>prisma/scripts/aplicar-constraints.sql</code> (Glicemia 20-800, unidade IN [MG_DL,MMOL_L]) — <strong>fora do pipeline Prisma</strong></li>
+              <li><strong>RLS policies</strong>: existem em <code>prisma/scripts/aplicar-rls.sql</code> (10 tabelas, policies <code>service_role</code> + isolation por <code>clinicaId</code> via <code>auth.jwt()</code>) — <strong>fora do pipeline Prisma</strong></li>
+              <li><strong>Triggers / Views / pg_cron</strong>: continuam ausentes</li>
+              <li><strong>Distributed lock para node-cron</strong>: implementado via <code>utils/redisLock.ts</code> (SET NX EX) — multi-instância seguro</li>
+            </ul>
+            <p>Risco residual: scripts SQL fora do pipeline dependem de DBA rodar à mão; sem evidência em CI/Dockerfile.</p>
+          </div>
+        </div>
       </section>
 
       <!-- 7 · AQS -->
@@ -498,6 +654,26 @@ psql $URL_BANCO -c "
             <li>⚠️ "Rechecagem em 1 hora" é só texto · não agendado · depende do paciente reenviar voluntariamente</li>
             <li>⚠️ Não há "controle 2h pós-refeição" implementado · só sugestão em texto</li>
           </ul>
+        </div>
+
+        <div class="depois-block depois-block-parcial">
+          <div class="depois-header depois-header-parcial">📅 Depois · 2026-05-24 · Protocolos AQS</div>
+          <div class="depois-body">
+            <p><strong>Conteúdo migrou para DB</strong>. Seeds populam <code>ProtocoloClinico</code> "Protocolo AQS" + <code>AcaoProtocolo</code> com as 5 faixas (HIPO / NORMAL / SEGURA / AQS-01 / AQS-02 / AQS-03):</p>
+            <ul>
+              <li><code>apps/backend/prisma/seed-aqs.ts</code> (237 linhas)</li>
+              <li><code>apps/backend/prisma/seed.ts</code> (345 linhas)</li>
+              <li><code>apps/backend/prisma/force-seed-protocolos.ts</code> (86 linhas)</li>
+            </ul>
+            <p>Runtime efetivamente lê DB: <code>fluxoEventoPremiumUtils.ts:268</code> chama <code>prisma.protocoloClinico.findFirst({ include: { acoes } })</code>. <code>fluxoEventoPremium.ts:140-162</code> monta mensagem a partir de <code>obterAcoesProtocolo(clinicaId, faixa)</code>.</p>
+            <p><strong>"Rechecagem 1h" e "controle 2h"</strong> agora agendam de verdade via <code>TimerAgendamento</code> (<code>RECHECAGEM_AQS</code> + <code>POS_PRANDIAL</code>) processados por <code>workers/timerWorker.ts</code> a cada 1 min (<code>take: 20</code>).</p>
+            <p><strong class="tag-parcial">MAS continua hardcoded</strong> em <code>fluxoEventoPremiumUtils.ts</code>:</p>
+            <ul>
+              <li>Linha 286: <code>if (evento.glicemiaInicial &amp;&amp; evento.glicemiaInicial &gt; 180)</code> — threshold mágico literal</li>
+              <li>Linhas 355–361: switch literal <code>'AQS-01' → '1,5 litro de água'</code> / <code>'AQS-02' → '2 litros'</code> / <code>'AQS-03' → '3 litros'</code> — duplicado vs <code>seed.ts</code> (que tem mesmo conteúdo em <code>AcaoProtocolo.parametros</code>), mas runtime não consome o seed nesse ponto específico</li>
+              <li>Linhas 282–294: dicas em <code>montarMensagemDurante()</code></li>
+            </ul>
+          </div>
         </div>
       </section>
 
@@ -526,6 +702,20 @@ psql $URL_BANCO -c "
               <tr><td>Limite diário grátis</td><td>code</td><td>worker</td><td><span class="badge badge-fail">❌</span></td><td>hardcoded</td></tr>
             </tbody>
           </table>
+        </div>
+
+        <div class="depois-block depois-block-parcial">
+          <div class="depois-header depois-header-parcial">📅 Depois · 2026-05-24 · Mensagens</div>
+          <div class="depois-body">
+            <p><strong>Infra nova</strong>: <code>apps/backend/src/modulos/whatsapp/services/MessageDispatcher.ts</code> expõe <code>enviarMensagemSistema(chave)</code> que lê <code>prisma.mensagemSistema</code> + suporta fallback template fora da janela 24h. Seeds em <code>seed-aqs.ts</code> populam 4 chaves de <code>MensagemSistema</code>.</p>
+            <p><strong class="tag-parcial">Adoção mínima</strong>: apenas <strong>1 call site</strong> usa essa infra (<code>processarMensagem.ts:133</code> · chave <code>SOLICITAR_CADASTRO</code>).</p>
+            <p>Contagem dos handlers atuais: <strong>37 chamadas de <code>enviarTextoComRegistro(</code></strong> em 8 handlers com strings inline. Em <code>fluxoEventoPremium.ts</code> sozinho: 13 (linhas 116, 142, 212, 230–233, 239, 251, 257…). Total de strings literais portuguesas ≥15 chars nos handlers: <strong>47 ocorrências</strong>. A migração começou mas falta percorrer todos os call-sites.</p>
+            <p><strong class="tag-fechado">Resolvidos especificamente</strong>:</p>
+            <ul>
+              <li>AQS-01/02/03 evento: agora vem de <code>protocoloClinico.acoes</code> via <code>obterAcoesProtocolo</code> (mensagem montada do DB)</li>
+              <li>"chá+vitamina+escalda" hardcoded: grep nos handlers retorna zero matches semânticos</li>
+            </ul>
+          </div>
         </div>
       </section>
 
@@ -598,6 +788,34 @@ flowchart TD
   classDef json fill:#1a2742,stroke:#7c9eff,color:#fff,stroke-width:2px
   classDef notfound fill:#222,stroke:#888,color:#fff,stroke-width:2px,stroke-dasharray: 5 5
         </div>
+
+        <div class="depois-block depois-block-misto">
+          <div class="depois-header depois-header-misto">📅 Depois · 2026-05-24 · Fluxograma atualizado</div>
+          <div class="depois-body">
+            <p>Nós que mudaram de cor (🟥 CODE → 🟩 DB):</p>
+            <ul>
+              <li><strong>CLA</strong> (classificarFaixa): agora 🟩 DB via <code>prisma.faixaGlicemica</code> + cache 5min · com fallback hardcoded de 5 faixas em <code>utils/classificarGlicemia.ts:56-61</code></li>
+              <li><strong>AM</strong> (montarMensagemAqs): agora 🟩 DB via <code>protocoloClinico.acoes</code></li>
+              <li><strong>WAIT</strong> ("Espera paciente reenviar SEM TIMER REAL"): substituído por 🟩 DB <code>TimerAgendamento</code> + <code>workers/timerWorker.ts</code></li>
+              <li><strong>SJ</strong> (JSON em <code>onboardingDados._eventoPremium</code>): <strong>continua ⬜ JSON</strong> — caminho escrito em paralelo com novo 🟩 DB <code>SessaoProtocolo</code> (dupla fonte)</li>
+            </ul>
+            <p>Nós novos:</p>
+            <ul>
+              <li>🟩 <strong>OUT</strong> (<code>OutboxWhatsApp</code>) intermedia todo envio com retry backoff exponencial</li>
+              <li>🟩 <strong>TMR</strong> (<code>TimerAgendamento</code>) + worker dedicado processa <code>RECHECAGEM_AQS</code> e <code>POS_PRANDIAL</code> a cada 1 min</li>
+              <li>🟨 <strong>NORM</strong> (<code>utils/normalizarGlicemia.ts</code>) detecta mmol e multiplica por 18.0182 antes de chegar em CLA</li>
+              <li>🟩 <strong>SA</strong> (<code>SintomaAlerta</code>) substitui array hardcoded em <code>fluxoEventoPremiumUtils.ts</code></li>
+              <li>🟩 <strong>LOCK</strong> (<code>utils/redisLock.ts</code>) envolve C15/C60 → multi-instância seguro</li>
+            </ul>
+            <p>Nós que continuam 🟥 CODE (não mudaram):</p>
+            <ul>
+              <li>EXT1/EXT2 (extração de número via regex)</li>
+              <li>AUT (threshold ≥250 hardcoded · <code>automationWorker.ts:112</code> sem diff)</li>
+              <li>SC (score-engine hardcoded 70/180/3d)</li>
+              <li>3 classificadores divergentes no <code>workers/ia-worker/</code> (drift backend ↔ worker)</li>
+            </ul>
+          </div>
+        </div>
       </section>
 
       <!-- 10 · GAPS -->
@@ -643,6 +861,41 @@ flowchart TD
           <div class="callout callout-info"><strong>19.</strong> <code>Refeicao</code> sem coluna <code>consumoEm</code> · só <code>criadoEm</code>. Predição glicêmica sem timestamp confiável.</div>
           <div class="callout callout-info"><strong>20.</strong> Sem <code>Outbox</code> separar intenção de envio do envio efetivo. Hoje send-now síncrono.</div>
         </div>
+
+        <div class="depois-block depois-block-misto">
+          <div class="depois-header depois-header-misto">📅 Depois · 2026-05-24 · Status gap-a-gap</div>
+          <div class="depois-body">
+            <p><strong>P0 (8 gaps)</strong>:</p>
+            <ul>
+              <li><strong>1.</strong> Método AQS como entidade — <strong class="tag-parcial">PARCIAL</strong>: <code>ProtocoloClinico</code>+<code>AcaoProtocolo</code>+<code>FaixaGlicemica</code> existem e seeds populam; runtime lê DB. <code>fluxoEventoPremiumUtils.ts</code> ainda mantém threshold e textos AQS literais.</li>
+              <li><strong>2.</strong> Estado AQS em JSON arbitrário — <strong class="tag-parcial">PARCIAL</strong>: <code>SessaoProtocolo</code> populada; <code>_eventoPremium</code> JSON segue escrito em paralelo (18 ocorrências em <code>repository.ts</code>).</li>
+              <li><strong>3.</strong> 4 classificações coexistem — <strong class="tag-parcial">PARCIAL</strong>: fonte única <code>classificarGlicemia.ts:21-62</code> lendo DB, mas ainda há fallback hardcoded <strong>70/140/179/299/499</strong> + <code>ia-worker/glicemia.ts</code> tem 2 funções duplicadas (60/300) + <code>openai.ts:108-116</code> cita 70/180+60/300. <strong>4 fallbacks divergentes</strong> ainda no codebase.</li>
+              <li><strong>4.</strong> Sem agendamento real de 1h — <strong class="tag-fechado">FECHADO</strong>: <code>TimerAgendamento</code> tipo <code>RECHECAGEM_AQS</code> + <code>workers/timerWorker.ts</code>.</li>
+              <li><strong>5.</strong> Sem "controle 2h pós-refeição" — <strong class="tag-fechado">FECHADO</strong>: <code>POS_PRANDIAL</code> agendado em <code>handlers/mensagemGlicemia.ts:45-73</code>.</li>
+              <li><strong>6.</strong> Sem Outbox/Dispatch — <strong class="tag-fechado">FECHADO</strong>: <code>OutboxWhatsApp</code> + <code>workers/outboxWorker.ts</code> com retry backoff <code>2^n·30s</code>.</li>
+              <li><strong>7.</strong> Sem versionamento de método — <strong class="tag-parcial">PARCIAL</strong>: tabela <code>MetodoVersao</code> existe; sem hooks runtime lendo dela.</li>
+              <li><strong>8.</strong> Unidade <code>MMOL_L</code> nunca usada — <strong class="tag-parcial">PARCIAL</strong>: <code>utils/normalizarGlicemia.ts</code> detecta/converte; REST honra payload; WhatsApp grava sempre MG_DL (<code>repository.ts:116</code>, <code>mensagemGlicemia.ts:92</code>).</li>
+            </ul>
+            <p><strong>P1 (8 gaps)</strong>:</p>
+            <ul>
+              <li><strong>9.</strong> Validação 30-600 triplicada — <strong class="tag-parcial">PARCIAL</strong>: 3 ranges ainda convivem (<code>roteador 30-600</code> / <code>validar 20-800</code> / <code>ia-worker 2-800</code>).</li>
+              <li><strong>10.</strong> Dedup envio duplo — <strong class="tag-parcial">PARCIAL</strong>: janela 24h inalterada (<code>AutomationEngine.ts:103-117</code> e <code>MessageDispatcher.ts:53-79</code>). Outbox resolve idempotência por chave única.</li>
+              <li><strong>11.</strong> Sintomas alerta — <strong class="tag-parcial">PARCIAL</strong>: lê <code>SintomaAlerta</code> + variações; fallback 9 termos só se DB falhar.</li>
+              <li><strong>12.</strong> Cron sem lock distribuído — <strong class="tag-fechado">FECHADO</strong>: <code>utils/redisLock.ts</code> (SET NX EX) em todos os 3 jobs (<code>plugins/cron.ts:15,29,42</code>).</li>
+              <li><strong>13.</strong> <code>ClinicaConfig</code> só booleans — <strong class="tag-parcial">PARCIAL</strong>: <code>FaixaGlicemica.clinicaId</code> permite override por clínica, mas seeds populam só globais.</li>
+              <li><strong>14.</strong> Faixa crítica difere — <strong class="tag-aberto">ABERTO</strong>: ver gap 3.</li>
+              <li><strong>15.</strong> Sem RLS no Postgres — <strong class="tag-parcial">PARCIAL</strong>: <code>prisma/scripts/aplicar-rls.sql</code> (63 linhas, 10 tabelas + 9 policies clinicaId) <strong>fora do pipeline de migrations</strong>.</li>
+              <li><strong>16.</strong> Conteúdo clínico hardcoded sem aprovação — <strong class="tag-parcial">PARCIAL</strong>: conteúdo em DB; <code>MetodoVersao</code> existe mas sem <code>approved_by</code> em uso.</li>
+            </ul>
+            <p><strong>P2 (4 gaps)</strong>:</p>
+            <ul>
+              <li><strong>17.</strong> AQS sem template Meta-aprovado — sem mudança visível.</li>
+              <li><strong>18.</strong> Sem <code>EventoDecisao</code> log — <strong class="tag-parcial">PARCIAL</strong>: tabela <code>EventoDecisao</code> existe; cobertura de escrita não-auditada nesta passada.</li>
+              <li><strong>19.</strong> <code>Refeicao.consumoEm</code> ausente — não verificado nesta passada.</li>
+              <li><strong>20.</strong> Sem Outbox — <strong class="tag-fechado">FECHADO</strong> (ver P0-6).</li>
+            </ul>
+          </div>
+        </div>
       </section>
 
       <!-- 11 · HARDCODES -->
@@ -679,6 +932,38 @@ flowchart TD
             </tbody>
           </table>
         </div>
+
+        <div class="depois-block depois-block-misto">
+          <div class="depois-header depois-header-misto">📅 Depois · 2026-05-24 · Hardcodes status</div>
+          <div class="depois-body">
+            <p><strong class="tag-fechado">Movidos para DB</strong> (10 ocorrências):</p>
+            <ul>
+              <li><strong>#1</strong> Faixas AQS 70/179/299/499 → <code>FaixaGlicemica</code> seed (fallback hardcoded persiste)</li>
+              <li><strong>#3, #4</strong> Mensagens urgência e texto AQS → <code>MensagemSistema</code> / <code>AcaoProtocolo.parametros</code></li>
+              <li><strong>#5</strong> 7 sintomas alerta → <code>SintomaAlerta</code> (fallback 9 termos persiste se DB falhar)</li>
+              <li><strong>#6</strong> 9 etapas evento → mapeadas em <code>SessaoProtocolo.etapaAtual</code></li>
+              <li><strong>#23</strong> Schedules cron envolvidos em <code>redisLock</code> (multi-instância seguro)</li>
+            </ul>
+            <p><strong class="tag-parcial">Parcialmente movidos</strong> (4 ocorrências):</p>
+            <ul>
+              <li><strong>#2</strong> Volumes vitamina 1.5L/2L/3L: estão em <code>AcaoProtocolo.parametros</code> via seed, MAS <code>fluxoEventoPremiumUtils.ts:355-361</code> ainda tem switch literal duplicado</li>
+              <li><strong>#7, #13</strong> Classificadores 70/140/180 + score-engine 70/180: fallback hardcoded em <code>utils/classificarGlicemia.ts:56-61</code> e <code>workers/ia-worker/src/glicemia.ts:55-83</code> (duas funções)</li>
+              <li><strong>#18</strong> Validação 30-600 em <code>fluxoEventoPremiumUtils.ts</code>: substituída por <code>validarGlicemia.ts</code> (20-800)</li>
+              <li><strong>#24</strong> ~50 strings de mensagens: <code>MessageDispatcher.enviarMensagemSistema(chave)</code> existe; <strong>1/37 call-sites migrados</strong></li>
+            </ul>
+            <p><strong class="tag-aberto">Continuam hardcoded sem mudança</strong> (10 ocorrências):</p>
+            <ul>
+              <li><strong>#8</strong> <code>ia-worker/glicemia.ts:74</code> &gt;300/&lt;60 alerta crítico</li>
+              <li><strong>#9, #10</strong> Threshold 250 em <code>mensagemGlicemia.ts:33</code> + <code>automationWorker.ts:107-112</code> (este sem diff entre commits)</li>
+              <li><strong>#11, #12, #14</strong> 24h / 48h / 7d / 3d windows operacionais</li>
+              <li><strong>#15, #16</strong> Pesos score e janela "recuperação 3 dias"</li>
+              <li><strong>#17</strong> Lembretes 15/30/60min em <code>eventoPremiumRegras.ts:28-44</code></li>
+              <li><strong>#19, #20</strong> Validação 30-600 em <code>roteadorMensagem.ts:10</code> e 2-800 em <code>ia-worker/openai.ts</code> (continuam divergentes)</li>
+              <li><strong>#21, #22</strong> Grupos alimentos + score classificação prato + previsão pico em <code>ia-worker/prato.ts</code></li>
+            </ul>
+            <p>Resumo numérico: dos 24 hardcodes catalogados, <strong>~10 fechados (42%)</strong>, <strong>~4 parciais (17%)</strong>, <strong>~10 abertos (42%)</strong>.</p>
+          </div>
+        </div>
       </section>
 
       <!-- 12 · RISCOS CLÍNICOS -->
@@ -700,6 +985,23 @@ flowchart TD
               <tr><td>Threshold 250 dispara automação CONFIGURÁVEL pela clínica</td><td><span class="badge badge-review">BAIXA-MÉDIA</span></td><td>Clínica pode acidentalmente desativar <code>GLICEMIA_ALTA</code> → alerta crítico não chega · sem fallback.</td></tr>
             </tbody>
           </table>
+        </div>
+
+        <div class="depois-block depois-block-misto">
+          <div class="depois-header depois-header-misto">📅 Depois · 2026-05-24 · Riscos clínicos</div>
+          <div class="depois-body">
+            <ul>
+              <li><strong>Conteúdo "chá+vitamina+escalda" hardcoded</strong> — <strong class="tag-fechado">FECHADO</strong>: agora vem de <code>AcaoProtocolo</code> via seeds; grep nos handlers retorna zero matches semânticos.</li>
+              <li><strong>Sem disclaimer estrutural</strong> — não verificado; <code>MensagemSistema</code> permite adicionar campo, sem evidência de uso sistemático.</li>
+              <li><strong>mmol/L silenciosamente convertido</strong> — <strong class="tag-fechado">FECHADO</strong>: <code>utils/normalizarGlicemia.ts:12-41</code> detecta via texto + heurística clínica (valor&lt;35 sem mg/dl) e multiplica por 18.0182. <code>valorOriginal</code>+<code>unidadeOriginal</code> persistidos.</li>
+              <li><strong>Validação 30-600 não cobre edge cases</strong> — <strong class="tag-parcial">PARCIAL</strong>: novo <code>validarGlicemia.ts</code> aceita 20-800 (coma/DKA inclusos). MAS <code>roteadorMensagem.ts:10</code> ainda bloqueia em 30-600 antes do validador ser chamado.</li>
+              <li><strong>Sem RLS no DB</strong> — <strong class="tag-parcial">PARCIAL</strong>: <code>prisma/scripts/aplicar-rls.sql</code> existe com 10 ENABLE RLS + 10 policies service_role + 9 policies clinicaId via <code>auth.jwt()</code>; <strong>execução manual</strong> · sem evidência em CI/Dockerfile.</li>
+              <li><strong>Sem auditoria estruturada</strong> — <strong class="tag-parcial">PARCIAL</strong>: tabela <code>EventoDecisao</code> existe; cobertura runtime não-auditada nesta passada.</li>
+              <li><strong>Cron in-process sem lock</strong> — <strong class="tag-fechado">FECHADO</strong>: <code>utils/redisLock.ts</code> SET NX EX nos 3 jobs.</li>
+              <li><strong>Send-now síncrono</strong> — <strong class="tag-fechado">FECHADO</strong>: <code>OutboxWhatsApp</code> + worker async com retry exponencial.</li>
+              <li><strong>Threshold 250 sem fallback</strong> — <strong class="tag-aberto">ABERTO</strong>: <code>automationWorker.ts:112</code> sem diff entre 09477ca e 4c5fd1f. Único atenuante: floor <code>≥180</code> em <code>handlers/mensagemGlicemia.ts:98</code> duplica disparo mas não corrige o worker. Se clínica desabilitar <code>GLICEMIA_ALTA</code> continua sem alerta.</li>
+            </ul>
+          </div>
         </div>
       </section>
 
@@ -758,6 +1060,20 @@ flowchart TD
           <div class="callout callout-info"><strong>P0 · Ação 4 — <code>Outbox</code></strong><br/><span class="text-ink-300 text-sm">Todo envio passa por INSERT + worker dispatcher async. Retry com backoff. Idempotência absoluta. Resolve duplicação cron+handler.</span></div>
           <div class="callout callout-info"><strong>P0 · Ação 5 — <code>SessaoProtocolo</code> + <code>EventoDecisao</code></strong><br/><span class="text-ink-300 text-sm">Substituir JSON <code>_eventoPremium</code>. Daqui 6 meses qualquer paciente conta a história: "às 14:23 entrou em AQS-02 porque valor 320 caiu na faixa V1.0:300-499".</span></div>
         </div>
+
+        <div class="depois-block depois-block-misto">
+          <div class="depois-header depois-header-misto">📅 Depois · 2026-05-24 · 5 ações P0 propostas — status execução</div>
+          <div class="depois-body">
+            <ul>
+              <li><strong>P0 · Ação 1 — <code>MetodoVersao</code> + <code>FaixaGlicemica</code></strong> · <strong class="tag-parcial">PARCIAL</strong>: <code>FaixaGlicemica</code> + <code>classificarGlicemia.ts:21-62</code> lendo DB ✓ · <code>MetodoVersao</code> tabela existe mas sem leitura runtime ⚠</li>
+              <li><strong>P0 · Ação 2 — <code>Protocolo</code> + <code>EtapaProtocolo</code> + <code>MensagemTemplate</code></strong> · <strong class="tag-parcial">PARCIAL</strong>: <code>ProtocoloClinico</code>+<code>AcaoProtocolo</code>+<code>MensagemSistema</code> seeded ✓ · <code>fluxoEventoPremium.ts</code> lê DB ✓ · porém <code>fluxoEventoPremiumUtils.ts</code> ainda tem thresholds e textos literais ⚠</li>
+              <li><strong>P0 · Ação 3 — <code>Timer</code> + scheduler dedicado</strong> · <strong class="tag-fechado">FECHADO</strong>: <code>TimerAgendamento</code> com <code>idempotencyKey</code> + <code>workers/timerWorker.ts</code> processando <code>RECHECAGEM_AQS</code> e <code>POS_PRANDIAL</code> a cada 1 min · "controle 2h" habilitado</li>
+              <li><strong>P0 · Ação 4 — <code>Outbox</code></strong> · <strong class="tag-fechado">FECHADO</strong>: <code>OutboxWhatsApp</code> + <code>workers/outboxWorker.ts</code> · retry backoff <code>2^tentativas·30s</code> · max 5 tentativas</li>
+              <li><strong>P0 · Ação 5 — <code>SessaoProtocolo</code> + <code>EventoDecisao</code></strong> · <strong class="tag-parcial">PARCIAL</strong>: ambas tabelas existem · <code>SessaoProtocolo</code> populada por <code>fluxoEventoPremiumUtils.ts:287-322</code> · <strong>MAS</strong> <code>_eventoPremium</code> JSON continua escrito em paralelo (18 ocorrências em <code>repository.ts</code> linhas 264–481) · dupla fonte de verdade ainda viva</li>
+            </ul>
+            <p>Placar: <strong>2 fechados de 5 (40%)</strong>, 3 parciais (60%). Maior pendência: apagar o caminho legacy <code>_eventoPremium</code> do <code>whatsapp/repository.ts</code> para que <code>SessaoProtocolo</code> seja única fonte.</p>
+          </div>
+        </div>
       </section>
 
       <!-- 14 · EVIDÊNCIAS -->
@@ -786,6 +1102,53 @@ flowchart TD
           </table>
         </div>
         <p class="text-ink-400 text-xs mt-4">Nenhuma query SQL executada · não havia credencial DB neste ambiente · auditoria realizada via código.</p>
+
+        <div class="depois-block depois-block-misto">
+          <div class="depois-header depois-header-misto">📅 Depois · 2026-05-24 · Novas evidências</div>
+          <div class="depois-body">
+            <p><strong>Schema</strong>:</p>
+            <ul>
+              <li><code>apps/backend/prisma/schema.prisma</code> (33 models, era 20)</li>
+              <li><code>apps/backend/prisma/migrations/20260523150000_baseline_consolidada/migration.sql</code> (850 linhas)</li>
+            </ul>
+            <p><strong>Seeds</strong>:</p>
+            <ul>
+              <li><code>apps/backend/prisma/seed-aqs.ts</code> (237 linhas)</li>
+              <li><code>apps/backend/prisma/seed.ts</code> (345 linhas)</li>
+              <li><code>apps/backend/prisma/force-seed-protocolos.ts</code> (86 linhas)</li>
+            </ul>
+            <p><strong>Scripts SQL fora do pipeline Prisma</strong>:</p>
+            <ul>
+              <li><code>apps/backend/prisma/scripts/aplicar-rls.sql</code> (63 linhas · 10 ENABLE RLS + 10 service_role + 9 isolation)</li>
+              <li><code>apps/backend/prisma/scripts/aplicar-constraints.sql</code> (43 linhas · Glicemia 20-800, unidade IN, Refeicao, SessaoProtocolo, SintomaAlerta, OutboxWhatsApp)</li>
+            </ul>
+            <p><strong>Novos utilitários</strong>:</p>
+            <ul>
+              <li><code>apps/backend/src/utils/normalizarGlicemia.ts</code> (mmol/L → mg/dL)</li>
+              <li><code>apps/backend/src/utils/validarGlicemia.ts</code> (range 20-800)</li>
+              <li><code>apps/backend/src/utils/classificarGlicemia.ts</code> (DB cached 5min)</li>
+              <li><code>apps/backend/src/utils/redisLock.ts</code> (SET NX EX)</li>
+            </ul>
+            <p><strong>Workers novos</strong>:</p>
+            <ul>
+              <li><code>apps/backend/src/workers/outboxWorker.ts</code></li>
+              <li><code>apps/backend/src/workers/timerWorker.ts</code></li>
+            </ul>
+            <p><strong>Serviços novos</strong>:</p>
+            <ul>
+              <li><code>apps/backend/src/modulos/whatsapp/services/MessageDispatcher.ts</code></li>
+            </ul>
+            <p><strong>Evidências de gaps abertos</strong>:</p>
+            <ul>
+              <li><code>apps/backend/src/modulos/automacoes/automationWorker.ts:112</code> (threshold 250 · sem diff)</li>
+              <li><code>apps/backend/src/modulos/whatsapp/routing/roteadorMensagem.ts:10</code> (gate 30-600 antes do validador)</li>
+              <li><code>apps/backend/src/modulos/whatsapp/repository.ts:264,329-345,369-370,412-433,463-481</code> (18 escritas em <code>_eventoPremium</code> JSON)</li>
+              <li><code>apps/backend/src/modulos/whatsapp/handlers/fluxoEventoPremiumUtils.ts:286,355-361</code> (thresholds e volumes literais)</li>
+              <li><code>workers/ia-worker/src/glicemia.ts:24-58,60-83</code> (duas funções <code>classificarGlicemiaLocal</code> duplicadas · 60/300)</li>
+              <li><code>workers/ia-worker/src/openai.ts:108-116,255</code> (prompt 70/180+60/300 · range 2-800)</li>
+            </ul>
+          </div>
+        </div>
       </section>
 
       <!-- 14b · COMPROVAÇÃO SQL REAL (NOVO V2) -->
@@ -846,6 +1209,26 @@ flowchart TD
         <p class="text-ink-400 text-xs mt-4 leading-relaxed">
           JSON estruturado dos resultados em <code>C:\tmp\glucoai-audit-results.json</code> · cada query com <code>id</code>, <code>label</code>, <code>rowCount</code>, <code>rows</code> reais.
         </p>
+
+        <div class="depois-block depois-block-misto">
+          <div class="depois-header depois-header-misto">📅 Depois · 2026-05-24 · SQL real — projeção</div>
+          <div class="depois-body">
+            <p>As 21 queries SQL <strong>não foram re-rodadas</strong> nesta passada — verificação foi estática sobre o clone (sem aplicar baseline em Postgres real). Projeção do que mudaria com base no schema atual:</p>
+            <ul>
+              <li><code>Q1</code> Tabelas em public — esperado <strong>33</strong> (era 9)</li>
+              <li><code>Q2</code> Tabelas Protocol/Timer/Outbox/AQS — esperado <strong>≥11 presentes</strong> (era 0): <code>ProtocoloClinico</code>, <code>AcaoProtocolo</code>, <code>FaixaGlicemica</code>, <code>SessaoProtocolo</code>, <code>TimerAgendamento</code>, <code>OutboxWhatsApp</code>, <code>EventoDecisao</code>, <code>PredicaoAlimentar</code>, <code>MensagemSistema</code>, <code>SintomaAlerta</code>, <code>MetodoVersao</code></li>
+              <li><code>Q4, Q14, Q14b</code> Enums clínicos — esperado todos os 22 declarados (era 12; faltavam 10)</li>
+              <li><code>Q5</code> Functions/RPCs — esperado <strong>0</strong> (sem mudança · toda lógica em TS)</li>
+              <li><code>Q6, Q7</code> Triggers e Views — esperado <strong>0</strong> (sem mudança)</li>
+              <li><code>Q8, Q9</code> RLS — esperado <strong>0 via migrations</strong> · <strong>10 tabelas + 19 policies SE rodar <code>scripts/aplicar-rls.sql</code> manualmente</strong></li>
+              <li><code>Q11</code> CHECK constraints clínicos — esperado <strong>0 via migrations</strong> · <strong>≥5 SE rodar <code>scripts/aplicar-constraints.sql</code></strong></li>
+              <li><code>Q12</code> <code>Paciente.onboardingDados</code> jsonb — <strong>continua jsonb sem index</strong>; <code>_eventoPremium</code> ainda escrito em paralelo a <code>SessaoProtocolo</code></li>
+              <li><code>Q19</code> Drift schema vs DB — esperado <strong>0%</strong> (era 55%)</li>
+              <li><code>Q15</code> Migrations — esperado <strong>1 baseline consolidada</strong> (era 8 históricas)</li>
+            </ul>
+            <p><strong>Recomendação</strong>: re-rodar as 21 queries em Postgres real para confirmar projeção e detectar qualquer drift residual entre <code>schema.prisma</code> e a nova baseline.</p>
+          </div>
+        </div>
       </section>
 
       <!-- 15 · FINAL -->
@@ -872,6 +1255,39 @@ flowchart TD
           <li><strong>Sem versionamento.</strong> Mudar threshold apaga histórico.</li>
           <li><strong>Sem RLS no DB.</strong> Multi-tenancy via WHERE clinicaId na app · grave para dado LGPD-saúde.</li>
         </ol>
+
+        <div class="depois-block depois-block-parcial">
+          <div class="depois-header depois-header-parcial">📅 Depois · 2026-05-24 · Veredito final atualizado</div>
+          <div class="depois-body">
+            <p style="text-align:center; padding: 18px 0">
+              <span style="font-size: 44px">🟡</span><br/>
+              <strong style="font-size: 22px; color: #f59e0b">PARCIALMENTE RESOLVIDO</strong><br/>
+              <span style="font-size: 11px; letter-spacing: .2em; color: #9aa3b8; text-transform: uppercase">DB_CAN_BE_SOURCE_OF_TRUTH_BUT_DUAL_WRITES_PERSIST</span>
+            </p>
+            <p>Status dos 10 motivos originais:</p>
+            <ol style="list-style:decimal; padding-left:22px; margin-top:8px">
+              <li><strong class="tag-fechado">FECHADO</strong>: SCHEMA DRIFT 55% → 0%. 33 models, baseline única.</li>
+              <li><strong class="tag-fechado">FECHADO</strong>: Sistema de Automações persistível. <code>Automacao</code>+<code>ExecucaoAutomacao</code>+<code>TemplateWhatsapp</code>+<code>GatilhoAutomacao</code> presentes.</li>
+              <li><strong class="tag-parcial">PARCIAL</strong>: Decisões clínicas em código. Classificação lê DB; AQS lê DB. Mas fallback hardcoded em 4 lugares + thresholds literais em <code>fluxoEventoPremiumUtils.ts</code>.</li>
+              <li><strong class="tag-fechado">FECHADO</strong>: Entidades clínicas modeladas. As 10 propostas existem.</li>
+              <li><strong class="tag-parcial">PARCIAL</strong>: State em JSON. <code>SessaoProtocolo</code> populada, mas <code>_eventoPremium</code> escrito em paralelo.</li>
+              <li><strong class="tag-fechado">FECHADO</strong>: Scheduling clínico real. <code>TimerAgendamento</code> + <code>workers/timerWorker.ts</code>.</li>
+              <li><strong class="tag-fechado">FECHADO</strong>: Dispatch/Outbox. <code>OutboxWhatsApp</code> + worker com retry backoff.</li>
+              <li><strong class="tag-parcial">PARCIAL</strong>: Inconsistências clínicas. Fonte única + 3 fallbacks divergentes ainda no código.</li>
+              <li><strong class="tag-parcial">PARCIAL</strong>: Versionamento. <code>MetodoVersao</code> existe sem hooks runtime.</li>
+              <li><strong class="tag-parcial">PARCIAL</strong>: RLS. Script SQL existe (10 tabelas + 19 policies) mas fora do pipeline de migrations.</li>
+            </ol>
+            <p>Placar: <strong>5 FECHADOS / 5 PARCIAIS / 0 ABERTOS</strong> (entre os 10 motivos). Considerando todo o audit (12 achados): 5 FECHADOS / 6 PARCIAIS / 1 ABERTO (threshold 250 em <code>automationWorker.ts:112</code>).</p>
+            <p style="margin-top:14px"><strong>Próximas 5 ações de maior impacto/esforço</strong>:</p>
+            <ol style="list-style:decimal; padding-left:22px">
+              <li>Apagar o caminho <code>_eventoPremium</code> do <code>whatsapp/repository.ts</code> — fim da dupla fonte (<code>SessaoProtocolo</code> única)</li>
+              <li>Mover <code>scripts/aplicar-rls.sql</code> e <code>aplicar-constraints.sql</code> para migrations — RLS sai do "manual no DBA"</li>
+              <li>Consolidar range único — apagar gate 30-600 do <code>roteadorMensagem.ts:10</code> e 2-800 do <code>ia-worker</code></li>
+              <li><code>automationWorker.ts:112</code> — floor mínimo configurável ou bloquear <code>disable</code> de <code>GLICEMIA_ALTA</code> sem alternativa</li>
+              <li>Deletar <code>classificarGlicemiaLocal</code> duplicada no <code>ia-worker/src/glicemia.ts</code> — fim do drift backend↔worker</li>
+            </ol>
+          </div>
+        </div>
       </section>
 
       <!-- 16 · RESUMO -->
@@ -898,13 +1314,44 @@ flowchart TD
             </tbody>
           </table>
         </div>
+
+        <div class="depois-block depois-block-misto">
+          <div class="depois-header depois-header-misto">📅 Depois · 2026-05-24 · Resumo atualizado</div>
+          <div class="depois-body">
+            <table style="width:100%">
+              <thead><tr><th>Dimensão</th><th>Antes (2026-05-15)</th><th>Depois (2026-05-24)</th></tr></thead>
+              <tbody>
+                <tr><td>Recebimento WhatsApp inbound</td><td><span class="badge badge-ok">✅</span></td><td><span class="badge badge-ok">✅ inalterado</span></td></tr>
+                <tr><td>Persistência básica de leitura</td><td><span class="badge badge-ok">✅</span></td><td><span class="badge badge-ok">✅ inalterado</span></td></tr>
+                <tr><td>Análise via OpenAI Vision</td><td><span class="badge badge-ok">✅</span></td><td><span class="badge badge-ok">✅ inalterado</span></td></tr>
+                <tr><td>Classificação de glicemia</td><td><span class="badge badge-fail">❌ 4 versões</span></td><td><span class="badge badge-review">⚠ DB + 3 fallbacks divergentes</span></td></tr>
+                <tr><td>Protocolo AQS modelado</td><td><span class="badge badge-fail">❌ código+JSON</span></td><td><span class="badge badge-review">⚠ DB + JSON em paralelo</span></td></tr>
+                <tr><td>Mensagens configuráveis</td><td><span class="badge badge-fail">❌ 50+ strings</span></td><td><span class="badge badge-review">⚠ 1/37 calls migradas</span></td></tr>
+                <tr><td>Timer/rechecagem 1h</td><td><span class="badge badge-fail">❌ só texto</span></td><td><span class="badge badge-ok">✅ TimerAgendamento + worker</span></td></tr>
+                <tr><td>Controle 2h pós-refeição</td><td><span class="badge badge-fail">❌ não existe</span></td><td><span class="badge badge-ok">✅ POS_PRANDIAL</span></td></tr>
+                <tr><td>Outbox/dispatch</td><td><span class="badge badge-fail">❌ síncrono</span></td><td><span class="badge badge-ok">✅ OutboxWhatsApp + retry backoff</span></td></tr>
+                <tr><td>Audit de decisão clínica</td><td><span class="badge badge-fail">❌ JSON</span></td><td><span class="badge badge-review">⚠ EventoDecisao existe · uso não-auditado</span></td></tr>
+                <tr><td>Versionamento de método</td><td><span class="badge badge-fail">❌</span></td><td><span class="badge badge-review">⚠ MetodoVersao existe · sem hooks runtime</span></td></tr>
+                <tr><td>RLS no DB</td><td><span class="badge badge-fail">❌</span></td><td><span class="badge badge-review">⚠ Script SQL existe · fora do pipeline</span></td></tr>
+                <tr><td>Validação mmol/L</td><td><span class="badge badge-fail">❌</span></td><td><span class="badge badge-ok">✅ normalizarGlicemia.ts</span></td></tr>
+                <tr><td>Cron com distributed lock</td><td><span class="badge badge-fail">❌</span></td><td><span class="badge badge-ok">✅ redisLock SET NX EX</span></td></tr>
+                <tr><td>"chá+vitamina+escalda" hardcoded</td><td><span class="badge badge-fail">❌</span></td><td><span class="badge badge-ok">✅ AcaoProtocolo (DB)</span></td></tr>
+                <tr><td>Threshold 250 sem fallback</td><td><span class="badge badge-fail">❌</span></td><td><span class="badge badge-fail">❌ inalterado · automationWorker.ts:112</span></td></tr>
+                <tr style="background:rgba(245,158,11,.10)"><td><strong>Drift schema.prisma × DB</strong></td><td><span class="badge badge-fail">🚨 55%</span></td><td><span class="badge badge-ok">✅ 0% · baseline única</span></td></tr>
+                <tr style="background:rgba(245,158,11,.10)"><td><strong>Veredito (v3)</strong></td><td><span class="badge badge-fail">🔴 FAIL_DB</span></td><td><span class="badge" style="background:rgba(245,158,11,.14);color:#f59e0b">🟡 PARCIALMENTE RESOLVIDO · DUAL_WRITES</span></td></tr>
+              </tbody>
+            </table>
+            <p style="margin-top:14px"><strong>Veredito agregado v3</strong>: 5 FECHADOS / 6 PARCIAIS / 1 ABERTO. O risco mudou de <em>estrutural</em> (DB não suporta o método) para <em>operacional</em> (DB suporta mas dupla escrita silenciosa). Próximo passo crítico: apagar caminho legacy <code>_eventoPremium</code> JSON.</p>
+          </div>
+        </div>
       </section>
 
       <!-- FOOTER -->
       <footer class="border-t border-ink-700 pt-8 mt-12 text-center text-ink-400 text-xs">
         <p class="mb-2">Auditoria read-only · Zero <code>INSERT/UPDATE/DELETE</code> · Zero <code>deploy</code> · Zero <code>provider call</code>.</p>
-        <p>Gerada em 2026-05-15 · sobre <code>github.com/glucoai/glucoai</code> @ <code>09477ca</code></p>
+        <p>v1/v2 gerada em 2026-05-15 · sobre <code>github.com/glucoai/glucoai</code> @ <code>09477ca</code></p>
         <p class="mt-2"><strong class="text-ok">v2 com comprovação SQL real</strong> · validada em Postgres 17 Neon (SP) · 21 queries · zero escrita</p>
+        <p class="mt-2"><strong style="color:#f59e0b">v3 comparação Antes/Depois</strong> · gerada em 2026-05-24 · HEAD <code>4c5fd1f</code> · 219 arquivos · +6350 / −10122 · verificação estática sobre clone (SQL não re-rodado)</p>
         <p class="mt-3">Esta página é <strong>independente</strong> · não afeta o código do Gluco AI.</p>
       </footer>
 
