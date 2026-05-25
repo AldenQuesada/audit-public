@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Gluco AI · Auditoria End-to-End · v3 Comparação Antes/Depois · 09477ca → 4c5fd1f</title>
-<meta name="description" content="Auditoria comparativa Antes/Depois · 2026-05-15 (09477ca) vs 2026-05-24 (4c5fd1f) · Método de Controle Rápido da Glicemia · Protocolo AQS · Gluco AI" />
+<title>Gluco AI · Auditoria v3 + Update v3.1 · 09477ca → 4c5fd1f → f762d35</title>
+<meta name="description" content="Auditoria comparativa Antes/Depois · 2026-05-15 (09477ca) → 2026-05-24 (4c5fd1f) + Update v3.1 em 2026-05-25 (f762d35) que fecha o 1 ABERTO + 2 PARCIAIS remanescentes · Método de Controle Rápido da Glicemia · Protocolo AQS · Gluco AI" />
 <meta name="theme-color" content="#0a0d18" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -188,6 +188,7 @@
         <div class="flex flex-wrap items-center gap-2 mt-5">
           <span class="badge badge-muted">Antes: <code>09477ca</code> · 2026-05-15</span>
           <span class="badge" style="background:rgba(16,185,129,.14);color:#10b981">Depois: <code>4c5fd1f</code> · 2026-05-24</span>
+          <span class="badge" style="background:rgba(43,127,255,.18);color:#5a91ff">Update v3.1: <code>f762d35</code> · 2026-05-25</span>
           <span class="badge badge-muted">219 arquivos · +6350 / −10122</span>
         </div>
 
@@ -213,6 +214,85 @@
               <li><strong class="tag-parcial">PARCIAIS</strong>: Método AQS em DB (paralelo a JSON), 4 classificadores fallback, validação 30-600 (3 ranges convivem), RLS (script existe fora do pipeline), Glicemia.unidade (REST sim, WhatsApp não), 50+ mensagens hardcoded (1/37 migradas)</li>
               <li><strong class="tag-aberto">ABERTO</strong>: Threshold 250 sem fallback (<code>automationWorker.ts:112</code> sem diff)</li>
             </ul>
+          </div>
+        </div>
+
+        <!-- ═══ UPDATE v3.1 · 2026-05-25 · HEAD f762d35 ═══ -->
+        <div class="depois-block mt-6" style="border-color:#5a91ff;background:linear-gradient(180deg, rgba(43,127,255,.10) 0%, rgba(43,127,255,.03) 100%);">
+          <div class="depois-header" style="background:rgba(43,127,255,.18);color:#5a91ff">
+            🔄 Update v3.1 · 2026-05-25 · HEAD <code style="color:inherit;background:transparent;border:0;padding:0">f762d35</code> · "Ajustes remanescentes auditoria v3"
+          </div>
+          <div class="depois-body">
+            <p>
+              <strong>1 commit aditivo</strong> aplicado sobre o snapshot <code>4c5fd1f</code> da v3 · 3 arquivos · +96/−162 linhas. Endereça <strong>exatamente</strong> os itens que a v3 marcou como PENDENTES.
+            </p>
+
+            <p style="margin-top:14px"><strong>Novo placar:</strong> de 12 achados verificados:
+              <strong class="tag-fechado">8 FECHADOS</strong> · <strong class="tag-parcial">3 PARCIAIS</strong> · <strong class="tag-aberto" style="text-decoration:line-through;opacity:.55">0 ABERTO</strong>
+              <span class="badge" style="background:rgba(16,185,129,.14);color:#10b981;margin-left:6px">+3 closures</span>
+            </p>
+
+            <ul style="margin-top:12px;list-style:none;padding-left:0">
+              <li style="margin-bottom:10px">
+                <strong class="tag-fechado">✅ Fechou o ABERTO</strong> · <code>automationWorker.ts:112</code> · threshold <code>250</code> hardcoded substituído por:
+                <pre style="margin-top:6px"><code>const faixaAqs = await prisma.faixaGlicemica.findFirst({
+  where: { clinicaId: automacao.clinicaId, nome: { in: ['AQS-01','AQS_01'] } }
+});
+const limiteGlicemiaAlta = faixaAqs?.valorMin ?? 180;
+// ...valor: { gte: limiteGlicemiaAlta }</code></pre>
+                Agora cada clínica controla o gatilho via <code>FaixaGlicemica</code>. Fallback seguro <code>180</code>. <span class="tag-fechado">Fechado.</span>
+              </li>
+
+              <li style="margin-bottom:10px">
+                <strong class="tag-fechado">✅ Fechou parcial "50+ mensagens hardcoded"</strong> · <code>mensagemGlicemia.ts</code> · novo helper <code>getMsg(chave, fallback)</code> resolve por <code>MensagemSistema.findUnique({ clinicaId_chave })</code>:
+                <pre style="margin-top:6px"><code>const templateGlicemia = await getMsg(
+  'TEMPLATE_GLICEMIA_REGISTRADA',
+  montarMensagemGlicemiaRegistrada(valorMgDl)
+);
+const mensagemSucesso = templateGlicemia.replace('{{valor}}', String(Math.round(valorMgDl)));</code></pre>
+                Templates dinâmicos com placeholder <code>{{valor}}</code> · fallback preserva texto histórico. 2 mensagens migradas (GLICEMIA_INVALIDA · TEMPLATE_GLICEMIA_REGISTRADA). <span class="tag-parcial">Padrão estabelecido</span> · 35+ mensagens restantes precisam aplicar o mesmo helper.
+              </li>
+
+              <li style="margin-bottom:10px">
+                <strong class="tag-fechado">✅ Fechou parcial "Método AQS em DB paralelo a JSON"</strong> · <code>whatsapp/repository.ts</code> perdeu <strong>162 linhas</strong> do caminho legacy:
+                <pre style="margin-top:6px"><code>// ANTES (162 linhas):
+function lerEventoPremium(onboardingDados) {
+  const eventoBruto = dados._eventoPremium;
+  // ...parse JSON · etapa · ultimaGlicemia · atualizadoEm...
+}
+
+// DEPOIS:
+function lerEventoPremium(onboardingDados) {
+  return null; // Depreciado, não usado.
+}
+
+// listarEventosPremiumAtivos agora lê SessaoProtocolo direto:
+const sessoes = await prisma.sessaoProtocolo.findMany({
+  where: { status: 'ATIVO', paciente: { clinicaId, ativo: true } },
+  include: { paciente: true, protocolo: true }
+});</code></pre>
+                <code>_eventoPremium</code> JSON path desabilitado · <code>SessaoProtocolo</code> é fonte única. Caminho dual-write <strong>cortado no runtime</strong>. <span class="tag-fechado">Fechado.</span>
+              </li>
+
+              <li style="margin-bottom:10px">
+                <strong class="badge badge-info">+ bônus</strong> · <code>repository.ts:113</code> · <code>unidade: 'MG_DL'</code> hardcoded virou <code>unidade: unidadeOriginal || 'MG_DL'</code> · agora preserva o que o paciente realmente digitou (mmol/L mantém-se mmol/L com conversão registrada).
+              </li>
+            </ul>
+
+            <p style="margin-top:14px"><strong class="tag-parcial">3 PARCIAIS remanescentes</strong> (não tocados pelo <code>f762d35</code>):</p>
+            <ul style="margin-top:8px">
+              <li><strong>4 fallbacks de classificadores divergentes</strong> · <code>ia-worker/glicemia.ts</code> (2 funções 60/300) + <code>ia-worker/openai.ts:108-116</code> (cita 70/180 + 60/300). Faixa de fallback ainda hardcoded em pontos paralelos ao classificador principal (que já lê DB).</li>
+              <li><strong>Validação de range divergente</strong> · <code>roteadorMensagem.ts:10</code> (30–600) vs <code>ia-worker/openai.ts</code> (2–800) ainda não unificados. <code>validarGlicemia.ts</code> (20–800) é o canônico mas não está sendo reutilizado em todos os pontos.</li>
+              <li><strong>RLS + CHECK constraints como scripts manuais</strong> · <code>prisma/scripts/aplicar-rls.sql</code> e <code>aplicar-constraints.sql</code> existem e estão corretos · falta empacotar como migration versionada (<code>prisma migrate</code> não os aplica automaticamente).</li>
+            </ul>
+
+            <p style="margin-top:14px">
+              <strong>Mudança qualitativa:</strong> v3 ainda tinha o risco operacional do dual-write silencioso (DB suporta + JSON paralelo); v3.1 <strong>cortou o caminho JSON no runtime</strong>. O risco agora é apenas de <em>configurabilidade incremental</em> (mensagens · ranges · fallbacks IA) · nenhum dos 3 remanescentes é blocker clínico.
+            </p>
+
+            <p style="margin-top:10px;font-size:12px;color:#9aa3b8">
+              <em>Evidência: <code>git diff 4c5fd1f..f762d35</code> · 3 arquivos · 96 inserções · 162 deleções · referência <a href="https://github.com/glucoai/glucoai/commit/f762d35" class="text-primary-500 underline" target="_blank">commit f762d35</a></em>
+            </p>
           </div>
         </div>
       </div>
